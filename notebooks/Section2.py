@@ -35,7 +35,7 @@ import xarray as xr
 from joblib import Parallel, delayed
 from scipy.stats import gaussian_kde
 from scipy.optimize import curve_fit
-plt.rcParams['font.size'] = 20
+plt.rcParams['font.size'] = 24
 
 # Load the peak indexes and the metadata
 n_ds = xr.load_dataset('../data/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
@@ -154,6 +154,21 @@ n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
 s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
 
 # +
+# Convert Pacific City latitude and longitude to UTM coordinates 
+lat_pc, lon_pc = 45.201801, -123.960861 # Pacific City lat/lon
+utm_x_pc, utm_y_pc = dw.map.latlon_to_utm(lon_pc, lat_pc)
+
+# Adjust Pacific City's UTM coordinates to the shifted coordinate system (relative to utm_xf, utm_yf)
+utm_x_pc, utm_y_pc = utm_xf - utm_x_pc, utm_y_pc - utm_y0
+
+# +
+# Pick grid location to plot as examples
+examples = [421, 510, 800]  # Example indices to plot
+colors = ['tab:pink', 'tab:purple', 'tab:green'] # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
+
+print(f"Selected examples to plot on grid and delays: {examples}")
+
+# +
 # Plot the grid points on the map
 import cmocean.cm as cmo
 from matplotlib.ticker import FuncFormatter
@@ -186,26 +201,41 @@ ax.plot(df_south['x'], df_south['y'], 'tab:orange', label='South cable', lw=2.5)
 # ax.plot(df_north_used['x'], df_north_used['y'], 'tab:green', label='Used cable locations')
 
 # Plot the grid points
-ax.scatter(xg, yg, c='grey', s=4, label='Grid points')
+ax.scatter(xg, yg, c='grey', s=10, label='Grid points')
+# Plot the examples grid points
+for i, example in enumerate(examples):
+    if i == 0:
+        ax.scatter(xg[example], yg[example], color='white', edgecolors='k', s=200, label=f'Example sources', marker='*')
+        ax.scatter(xg[example], yg[example], color=colors[i], s=300, marker='*', edgecolors='k', zorder=5)
+    else:
+        ax.scatter(xg[example], yg[example], color=colors[i], s=300, marker='*', edgecolors='k', zorder=5)
 
 # Plot points along the cable every 10 km in terms of optical distance
 for i, point in enumerate(opticald_n, start=1):
-    # Plot the points
-    ax.plot(point[0], point[1], '.', color='k', markersize=10)
-    # Annotate the points with the distance
-    ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 5), ha='center', fontsize=12)
+    if i == 1:
+        ax.plot(point[0], point[1], '.', color='k', markersize=10, label='Cable Length [km]')
+        # Annotate the points with the distance
+        ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 10), ha='center')
+    else:
+        ax.plot(point[0], point[1], '.', color='k', markersize=10)
+        # Annotate the points with the distance
+        ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 10), ha='center')
 
 for i, point in enumerate(opticald_s, start=1):
     ax.plot(point[0], point[1], '.', color='k', markersize=10)
-    ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, -15), ha='center', fontsize=12)
+    ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, -30), ha='center')
 
-# Plot the point of the selected hyperbola
-# ax.scatter(xg[ipos], yg[ipos], c='r', s=10, marker='x', label='Selected point')
-# # Plot the four grid points around the selected point
-# ax.scatter(xg[ipos-1], yg[ipos], c='b', s=20, marker='x', label='Point 1')
-# ax.scatter(xg[ipos+1], yg[ipos], c='b', s=20, marker='x', label='Point 2')
-# ax.scatter(xg[ipos], yg[ipos-45], c='b', s=20, marker='x', label='Point 3') # 45 points per horizontal line in this case
-# ax.scatter(xg[ipos], yg[ipos+45], c='b', s=20, marker='x', label='Point 4')
+# Plot the Pacific City location
+ax.scatter(utm_x_pc, utm_y_pc, marker='s', color='tab:red', s=100, zorder=5, edgecolor='k')
+ax.annotate('Pacific City', (utm_x_pc, utm_y_pc), 
+            textcoords='offset points', xytext=(15, 20), 
+            ha='center', color='k',
+            bbox=dict(boxstyle='round,pad=0.1', facecolor='white', alpha=0.8))
+
+# Plot the repeater locations
+ax.scatter(df_north['x'].iloc[-1], df_north['y'].iloc[-1], marker='o', color='white', s=100, zorder=5, edgecolor='k', label='Repeaters')
+ax.scatter(df_north['x'].iloc[-1], df_north['y'].iloc[-1], marker='o', color='tab:red', s=100, zorder=5, edgecolor='k')
+ax.scatter(df_south['x'].iloc[-1], df_south['y'].iloc[-1], marker='o', color='tab:orange', s=100, zorder=5, edgecolor='k')
 
 # Add dashed contours at selected depths with annotations
 # depth_levels = [-20]
@@ -231,21 +261,14 @@ ax.yaxis.set_major_formatter(FuncFormatter(m_to_km_formatter))
 
 plt.xlabel('x [km]')
 plt.ylabel('y [km]')
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', labelspacing=0.2, ncol=2, columnspacing=0.6)
 plt.tight_layout()
-plt.savefig('../figs/Figure1a.pdf', bbox_inches='tight')
+plt.savefig('../figs/Figure1a.pdf', bbox_inches='tight', transparent=True)
 plt.show()
 
 # +
-# Plot the arrival times for the grid
-examples = [421, 510, 800]  # Example indices to plot
-colors = cm.plasma(np.linspace(0, 0.75, len(examples)))
-
-print(f"Selected examples: {examples}")
-# Determine global limits
-
 # Plot
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 20), sharex=True, constrained_layout=True)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3, 7), sharex=True, constrained_layout=True)
 
 # North
 ax1.set_title('North Cable')
@@ -271,5 +294,5 @@ ax2.grid(ls='--', alpha=0.5)
 ax2.set_aspect('equal')
 
 # plt.tight_layout()
-plt.savefig('../figs/toa_examples.pdf', bbox_inches='tight')
+plt.savefig('../figs/Figure1b.pdf', bbox_inches='tight', transparent=True)
 plt.show()
