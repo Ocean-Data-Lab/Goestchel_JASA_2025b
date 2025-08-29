@@ -163,8 +163,8 @@ utm_x_pc, utm_y_pc = utm_xf - utm_x_pc, utm_y_pc - utm_y0
 
 # +
 # Pick grid location to plot as examples
-examples = [421, 510, 800]  # Example indices to plot
-colors = ['tab:pink', 'tab:purple', 'tab:green'] # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
+examples = [421, 510, 800, 347]  # Example indices to plot
+colors = ['tab:pink', 'tab:purple', 'tab:green', 'gold'] # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
 
 print(f"Selected examples to plot on grid and delays: {examples}")
 
