@@ -163,7 +163,8 @@ utm_x_pc, utm_y_pc = utm_xf - utm_x_pc, utm_y_pc - utm_y0
 
 # +
 # Pick grid location to plot as examples
-examples = [421, 510, 800, 347]  # Example indices to plot
+examples = [421, 555, 800, 347]  # Example indices to plot
+max_delay = 555
 colors = ['tab:pink', 'tab:purple', 'tab:green', 'gold'] # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
 
 print(f"Selected examples to plot on grid and delays: {examples}")
@@ -261,7 +262,7 @@ ax.yaxis.set_major_formatter(FuncFormatter(m_to_km_formatter))
 
 plt.xlabel('x [km]')
 plt.ylabel('y [km]')
-plt.legend(loc='upper left', labelspacing=0.2, ncol=2, columnspacing=0.6)
+plt.legend(loc='upper center', labelspacing=0.2, ncol=2, columnspacing=0.6)
 plt.tight_layout()
 plt.savefig('../figs/Figure1a.pdf', bbox_inches='tight', transparent=True)
 plt.show()
