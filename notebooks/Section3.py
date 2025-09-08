@@ -40,12 +40,12 @@ from scipy.stats import gaussian_kde
 from sklearn.neighbors import KernelDensity
 from scipy.optimize import curve_fit
 import scipy.signal as sp
-plt.rcParams['font.size'] = 40
+plt.rcParams['font.size'] = 24
 plt.rcParams['lines.linewidth'] = 3
 
 # Load the peak indexes and the metadata
-n_ds = xr.load_dataset('../out/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
-s_ds = xr.load_dataset('../out/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
+n_ds = xr.load_dataset('../data/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
+s_ds = xr.load_dataset('../data/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
 
 # +
 # Constants from the metadata
@@ -357,57 +357,6 @@ print(f'Combined HF max kde: {hf_max_kde}, max index: {hf_imax}, max time: {hf_t
 print(f'Combined LF max kde: {lf_max_kde}, max index: {lf_imax}, max time: {lf_tmax}')
 
 # +
-# Plot the KDE
-# plt.figure(figsize=(20,12))
-# plt.subplot(3,1,1)
-# plt.title('North Cable')
-# # plt.plot(n_t_grid_hf[nhf_imax, :], n_kde_hf[nhf_imax, :], color='tab:blue', lw=2, label='north HF')
-# # plt.plot(n_t_grid_lf[nlf_imax, :], n_kde_lf[nlf_imax, :], color='tab:orange', lw=2, label='north LF')
-# plt.plot(t_kde, n_kde_hf[nhf_imax, :], color='tab:blue', lw=2, label='north HF')
-# plt.plot(t_kde, n_kde_lf[nlf_imax, :], color='tab:orange', lw=2, label='north LF')
-# plt.plot(t_kde, n_kde_hf[hf_imax, :], color='tab:cyan', lw=2, ls='--', label='north HF, maxsingle')
-# plt.plot(t_kde, n_kde_lf[lf_imax, :], color='tab:red', lw=2, ls='--', label='north LF, maxsingle')
-# plt.xlim(0, 60)
-# plt.ylim(0, max(np.max(hf_kde), np.max(lf_kde)) * 1.1)
-# plt.ylabel('Probability density [-]')
-
-# plt.grid(linestyle='--', alpha=0.5)
-# plt.legend()
-
-# plt.subplot(3,1,2)
-# plt.title('South Cable')
-# plt.plot(t_kde, s_kde_hf[shf_imax, :], color='tab:blue', lw=2, label='south HF')
-# plt.plot(t_kde, s_kde_lf[slf_imax, :], color='tab:orange', lw=2, label='south LF')
-# plt.plot(t_kde, s_kde_hf[hf_imax, :], color='tab:cyan', lw=2, ls='--', label='south HF, maxsingle')
-# plt.plot(t_kde, s_kde_lf[lf_imax, :], color='tab:red', lw=2, ls='--', label='south LF, maxsingle')
-# plt.ylabel('Probability density [-]')
-# plt.xlim(0, 60)
-# plt.ylim(0, max(np.max(hf_kde), np.max(lf_kde)) * 1.1)
-# plt.grid(linestyle='--', alpha=0.5)
-# plt.legend()
-
-# plt.subplot(3,1,3)
-# plt.title('Combined KDE')
-# plt.plot(t_kde, hf_kde[hf_imax, :], color='tab:green', lw=2, label="Combined HF")
-# plt.plot(t_kde, lf_kde[lf_imax, :], color='tab:purple', lw=2, label="Combined LF")
-# plt.xlim(0, 60)
-# plt.ylim(0, max(np.max(hf_kde), np.max(lf_kde)) * 1.1)
-# plt.ylabel('Probability density [-]')
-# plt.xlabel('Delayed time [s]')
-# plt.grid(linestyle='--', alpha=0.5)
-# plt.legend()
-# plt.show()
-
-# plt.figure(figsize=(20,8))
-# plt.title('Combined KDE')
-# plt.plot(t_kde_common, hf_kde[hf_imax, :], color='tab:blue', lw=2, label='HF')
-# plt.plot(t_kde_common, lf_kde[lf_imax, :], color='tab:orange', lw=2, label='LF')
-# plt.xlabel('Delayed time [s]')
-# plt.grid(linestyle='--', alpha=0.5)
-# plt.legend()
-# plt.show()
-
-# +
 # replacing kde by histogram
 hist_range = (t_kde[0], t_kde[-1])
 bins = len(t_kde)
@@ -436,112 +385,59 @@ s_lf_hist = s_lf_hist / np.trapezoid(s_lf_hist, t_kde)
 
 # +
 # Print the delayed time for the maximum KDE on north and south cables, lf
-plt.figure(figsize=(10,16), constrained_layout=True)
-plt.subplot(8, 1, (1, 3))
-plt.title('North Cable')
-plt.scatter(n_delayed_picks_hf[hf_imax, :], (n_longi_offset + npeakshf[0][:]) * dx * 1e-3, label='HF', c=nSNRhf, s=nSNRhf*0.8, cmap='plasma', rasterized=True)
-plt.scatter(n_delayed_picks_lf[lf_imax, :], (n_longi_offset + npeakslf[0][:]) * dx * 1e-3, label='LF', c=nSNRlf, s=nSNRlf*0.8, cmap='viridis', rasterized=True)
-plt.xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
-plt.grid(linestyle='--', alpha=0.5)
-plt.ylabel('Distance [km]')
+# Calculate height ratios based on y-range
+y_range_north = (n_selected_channels_m[1] - n_selected_channels_m[0])  # meters
+y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
+height_ratio = y_range_south / y_range_north
+print(height_ratio)
 
-plt.subplot(8, 1, (5, 7))
-plt.title('South Cable')
-plt.scatter(s_delayed_picks_hf[hf_imax, :], (s_longi_offset + speakshf[0][:]) * dx * 1e-3, label='HF', c=sSNRhf, s=sSNRhf*0.8, cmap='plasma', rasterized=True)
-plt.scatter(s_delayed_picks_lf[lf_imax, :], (s_longi_offset + speakslf[0][:]) * dx * 1e-3, label='LF', c=sSNRlf, s=sSNRlf*0.8, cmap='viridis', rasterized=True)
-plt.xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
-plt.grid(linestyle='--', alpha=0.5)
-plt.ylabel('Distance [km]')
+fig, axes = plt.subplots(4, 1,figsize=(10,16), constrained_layout=True, sharex=True, sharey=False, gridspec_kw={'height_ratios': [1, 0.22, height_ratio, 0.22]})
+axes[0].set_title('North Cable')
+axes[0].scatter(n_delayed_picks_hf[hf_imax, :], (n_longi_offset + npeakshf[0][:]) * dx * 1e-3, label='HF', c=nSNRhf, s=nSNRhf*0.8, cmap='plasma', rasterized=True)
+axes[0].scatter(n_delayed_picks_lf[lf_imax, :], (n_longi_offset + npeakslf[0][:]) * dx * 1e-3, label='LF', c=nSNRlf, s=nSNRlf*0.8, cmap='viridis', rasterized=True)
+axes[0].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
+axes[0].grid(linestyle='--', alpha=0.5)
+axes[0].set_ylabel('Distance [km]')
+axes[0].set_aspect('equal', adjustable='box')
 
-plt.subplot(8, 1, 4)
-plt.plot(t_kde, n_kde_hf[nlf_imax, :], color='tab:orange', lw=3, label='HF')
-plt.plot(t_kde, n_kde_lf[nlf_imax, :], color='tab:green', lw=3, label='LF')
+axes[1].plot(t_kde, n_kde_hf[nlf_imax, :], color='tab:orange', lw=3, label='HF')
+axes[1].plot(t_kde, n_kde_lf[nlf_imax, :], color='tab:green', lw=3, label='LF')
 # plt.bar(lf_bin_edges[:-1], lf_hist, width=bin_width, alpha=0.5, label="Histogram", color='grey', edgecolor='black')
-plt.xlim(min(s_delayed_picks_lf[nlf_imax, :]), max(s_delayed_picks_lf[nlf_imax, :]))
+axes[1].set_xlim(min(s_delayed_picks_lf[nlf_imax, :]), max(s_delayed_picks_lf[nlf_imax, :]))
 # plt.xlim(4, 8)
-plt.ylim(0, max(np.max(n_kde_hf), np.max(n_kde_lf)) * 1.1)
-plt.grid(linestyle='--', alpha=0.5)
-plt.legend()
-plt.ylabel('Weighted\n occurrence [-]')
-plt.xlabel('Delayed time [s]')
+axes[1].set_ylim(0, max(np.max(n_kde_hf), np.max(n_kde_lf)) * 1.1)
+axes[1].grid(linestyle='--', alpha=0.5)
+axes[1].legend()
+axes[1].set_ylabel('Weighted\n occurrence [-]')
+axes[1].set_xlabel('Delayed time [s]')
 
-plt.subplot(8, 1, 8)
-plt.plot(t_kde, s_kde_hf[hf_imax, :], color='tab:orange', lw=3, label='HF')
-plt.plot(t_kde, s_kde_lf[lf_imax, :], color='tab:green', lw=3, label='LF')
+axes[2].set_title('South Cable')
+axes[2].scatter(s_delayed_picks_hf[hf_imax, :], (s_longi_offset + speakshf[0][:]) * dx * 1e-3, label='HF', c=sSNRhf, s=sSNRhf*0.8, cmap='plasma', rasterized=True)
+axes[2].scatter(s_delayed_picks_lf[lf_imax, :], (s_longi_offset + speakslf[0][:]) * dx * 1e-3, label='LF', c=sSNRlf, s=sSNRlf*0.8, cmap='viridis', rasterized=True)
+axes[2].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
+axes[2].grid(linestyle='--', alpha=0.5)
+axes[2].set_ylabel('Distance [km]')
+axes[2].set_aspect('equal', adjustable='box')
+
+
+axes[3].plot(t_kde, s_kde_hf[hf_imax, :], color='tab:orange', lw=3, label='HF')
+axes[3].plot(t_kde, s_kde_lf[lf_imax, :], color='tab:green', lw=3, label='LF')
 # plt.bar(s_lf_bin_edges[:-1], s_lf_hist, width=bin_width, alpha=0.5, label="Histogram", color='grey', edgecolor='black')
-plt.xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
-plt.ylim(0, max(np.max(s_kde_hf), np.max(s_kde_lf)) * 1.1)
-plt.ylabel('Weighted\n occurrence [-]')
-plt.xlabel('Delayed time [s]')
+axes[3].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
+axes[3].set_ylim(0, max(np.max(s_kde_hf), np.max(s_kde_lf)) * 1.1)
+axes[3].set_ylabel('Weighted\n occurrence [-]')
+axes[3].set_xlabel('Delayed time [s]')
 # plt.tight_layout()
+
 plt.grid(linestyle='--', alpha=0.5)
 plt.legend()
-plt.savefig('../figs/Figure3.pdf', bbox_inches='tight', transparent=True, format='pdf')
+fig.savefig('../figs/Figure3.pdf', bbox_inches='tight', transparent=True, format='pdf')
 plt.show()
 
 # -
 
 max_time_hf = t_kde[hf_tmax]
 max_time_lf = t_kde[lf_tmax]
-
-# +
-# Plot the hyberbola on top of the picks 
-# Create figure
-fig, axes = plt.subplots(2, 2, figsize=(20, 16), sharex=True, sharey=False, constrained_layout=True)
-
-# First subplot
-sc1 = axes[0, 0].scatter(npeakshf[1][:] / fs, (n_selected_channels_m[0] + npeakshf[0][:] * dx) * 1e-3, 
-                         c='grey',  s=nSNRhf, rasterized=True, alpha=0.8)
-axes[0, 0].plot(max_time_hf + n_arr_tg[hf_imax, :], n_dist/1e3, ls='-', lw=3, color='tab:blue')
-axes[0, 0].plot(max_time_hf + n_arr_tg[hf_imax, :] + dt_sel, n_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[0, 0].plot(max_time_hf + n_arr_tg[hf_imax, :] - dt_sel, n_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[0, 0].set_title('North Cable - HF')
-axes[0, 0].set_ylabel('Distance [km]')
-axes[0, 0].grid(linestyle='--', alpha=0.5)
-axes[0, 0].set_ylim(min(n_dist/1e3), max(n_dist/1e3))
-
-# Second subplot
-sc2 = axes[0, 1].scatter(npeakslf[1][:] / fs, (n_selected_channels_m[0] + npeakslf[0][:] * dx) * 1e-3, 
-                         c='grey',  s=nSNRlf, rasterized=True, alpha=0.8)
-axes[0, 1].plot(max_time_lf + n_arr_tg[lf_imax, :], n_dist/1e3, ls='-', lw=3, color='tab:blue')
-axes[0, 1].plot(max_time_lf + n_arr_tg[lf_imax, :] + dt_sel, n_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[0, 1].plot(max_time_lf + n_arr_tg[lf_imax, :] - dt_sel, n_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[0, 1].set_title('North Cable - LF')
-axes[0, 1].grid(linestyle='--', alpha=0.5)
-axes[0, 1].set_yticklabels([])
-
-# Third subplot
-sc3 = axes[1, 0].scatter(speakshf[1][:] / fs, (s_selected_channels_m[0] + speakshf[0][:] * dx) * 1e-3, 
-                         c='grey',  s=sSNRhf, rasterized=True, alpha=0.8)
-axes[1, 0].plot(max_time_hf + s_arr_tg[hf_imax, :], s_dist/1e3, ls='-', lw=3, color='tab:blue')
-axes[1, 0].plot(max_time_hf + s_arr_tg[hf_imax, :] + dt_sel, s_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[1, 0].plot(max_time_hf + s_arr_tg[hf_imax, :] - dt_sel, s_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[1, 0].set_title('South Cable - HF')
-axes[1, 0].set_xlabel('Time [s]')
-axes[1, 0].set_ylabel('Distance [km]')
-axes[1, 0].grid(linestyle='--', alpha=0.5)
-# set xlim to the same as the first subplot
-axes[1, 0].set_xlim(min(npeakshf[1][:] / fs), max(npeakshf[1][:] / fs))
-axes[1, 0].set_ylim(min(s_dist/1e3), max(s_dist/1e3))
-axes[1, 1].set_xticks(np.arange(0, max(speakshf[1][:] / fs)+10, 10))
-
-
-# Fourth subplot
-sc4 = axes[1, 1].scatter(speakslf[1][:] / fs, (s_selected_channels_m[0] + speakslf[0][:] * dx) * 1e-3, 
-                         c='grey',  s=sSNRlf, rasterized=True, alpha=0.8)
-axes[1, 1].plot(max_time_lf + s_arr_tg[lf_imax, :], s_dist/1e3, ls='-', lw=3, color='tab:blue')
-axes[1, 1].plot(max_time_lf + s_arr_tg[lf_imax, :] + dt_sel, s_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[1, 1].plot(max_time_lf + s_arr_tg[lf_imax, :] - dt_sel, s_dist/1e3, ls='--', lw=3, color='tab:orange')
-axes[1, 1].set_title('South Cable - LF')
-axes[1, 1].set_xlabel('Time [s]')
-axes[1, 1].grid(linestyle='--', alpha=0.5)
-# set xlim to the same as the first subplot
-axes[1, 1].set_xlim(min(npeakslf[1][:] / fs), max(npeakslf[1][:] / fs))
-axes[1, 1].set_yticklabels([])
-axes[1, 1].set_xticks(np.arange(0, max(speakslf[1][:] / fs)+10, 10))
-plt.savefig('../figs/associated_calls_1st.pdf', bbox_inches='tight', transparent=True, format='pdf')
-
-plt.show()
 
 # +
 # Plot the hyberbola on top of the picks 
@@ -607,405 +503,4 @@ for ax in axes:
     ax.legend(loc='best', frameon=True, fancybox=True, shadow=True)
 
 plt.savefig('../figs/Figure5.pdf', bbox_inches='tight', transparent=True, format='pdf')
-plt.show()
-
-
-# -
-
-def associate_picks(kde, t_grid, longi_offset, up_peaks, arr_tg, dx, c0, w_eval, dt_sel, fs, cable_pos, associated_list, used_hyperbolas, rejected_list, rejected_hyperbolas, snr):
-    """Associates picks with hyperbolas and updates the picks list."""
-    # Find the maximum of the KDE
-    max_kde_idx = np.argmax(kde)
-    imax, tmax = np.unravel_index(max_kde_idx, kde.shape)
-    max_time = t_grid[tmax].item()
-    # Select the picks that are within the 1.4 s window of the hyperbola
-    hyperbola = max_time + arr_tg[imax, :] # Theoretical arrival times for the selected hyperbola
-    idx_dist, idx_time = compute_selected_picks(up_peaks, hyperbola, dt_sel, fs) # Select the picks around the hyperbola within +/- dt_sel
-
-    times = idx_time / fs
-    distances = (longi_offset + idx_dist) * dx * 1e-3
-
-    window_mask = (times > np.min(times)) & (times < np.min(times) + w_eval)
-    # w_times = times[window_mask]
-    # w_distances = distances[window_mask]
-
-    # Calulate least squares fit
-    idxmin_t = np.argmin(idx_time)
-    apex_loc = cable_pos[:, 0][idx_dist[idxmin_t]]
-    Ti = idx_time / fs
-    Nbiter = 20
-    # Initial guess (apex_loc, mean_y, -30m, min(Ti))
-    n_init = [apex_loc, np.mean(cable_pos[:,1]), -40, np.min(Ti)]
-
-    # Solve the least squares problem
-    n, residuals = dw.loc.solve_lq(Ti, cable_pos[idx_dist], c0, Nbiter, fix_z=True, ninit=n_init, residuals=True)
-    # rms residual
-    rms = np.sqrt(np.mean(residuals[window_mask]**2))
-    
-    if rms < .4:
-        # Compute the residual cumsum from the minimum time, in positive and negative directions
-        #TODO: change variable names
-        left_cs = np.cumsum(abs(residuals[idxmin_t::-1])) # negative direction
-        right_cs = np.cumsum(abs(residuals[idxmin_t:])) # positive direction
-        mod_cs = np.concatenate((left_cs[::-1], right_cs[1:]))
-
-        mask_resi = mod_cs < 1500 # Mask the residuals that are below the threshold, key parameter
-
-        associated_list.append(np.asarray((idx_dist[mask_resi], idx_time[mask_resi])))
-        used_hyperbolas.append(arr_tg[imax, :])
-        arr_tg[imax, :] = dw.loc.calc_arrival_times(0, cable_pos, n[:3], c0)
-
-        # Remove selected picks from updated picks
-        # Create a boolean mask that starts by marking every column as True (to keep)
-        mask = np.ones(up_peaks.shape[1], dtype=bool)
-        for d, t in zip(idx_dist[mask_resi], idx_time[mask_resi]):   # For each pair to remove, update the mask
-            mask &= ~((up_peaks[0, :] == d) & (up_peaks[1, :] == t))
-        # Apply the mask only once to filter the columns
-        up_peaks = up_peaks[:, mask]
-        # Remove corresponding snr values
-        snr = snr[mask]
-
-    # if compute_curvature(w_times, w_distances) < 1000:
-    #     associated_list.append(np.asarray((sidx_dist, sidx_time)))
-    #     used_hyperbolas.append(arr_tg[imax, :])
-
-    else:
-        # Add the rejected hyperbola to the list
-        rejected_list.append(np.asarray((idx_dist, idx_time)))
-        rejected_hyperbolas.append(arr_tg[imax, :])
-        # Remove the hyperbola from the list
-        arr_tg = np.delete(arr_tg, imax, axis=0)
-
-    return up_peaks, arr_tg, associated_list, used_hyperbolas, rejected_list, rejected_hyperbolas, snr
-
-
-# +
-
-pbar = tqdm(range(iterations), desc="Associated calls: 0")
-
-# Start the loop that runs for a fixed number of iterations
-for iteration in pbar:
-    # Precompute the time indices
-    n_idx_times = np.array(n_up_peaks[1]) / fs # Update with the remaining peaks
-    s_idx_times = np.array(s_up_peaks[1]) / fs # Update with the remaining peaks
-
-    # Make a delayed picks array for all the grid points
-    # Broadcast the time indices delayed by the theoretical arrival times for the grid points
-    n_delayed_picks_hf = n_idx_times[None, :] - n_arr_tg[:, n_up_peaks[0]]
-    s_delayed_picks_hf = s_idx_times[None, :] - s_arr_tg[:, s_up_peaks[0]]
-
-    # Generate a 
-    global_min = min(np.min(n_delayed_picks_hf), np.min(n_delayed_picks_lf), np.min(s_delayed_picks_hf), np.min(s_delayed_picks_lf))
-    global_max = max(np.max(n_delayed_picks_hf), np.max(n_delayed_picks_lf), np.max(s_delayed_picks_hf), np.max(s_delayed_picks_lf))
-    Nkde = np.ceil((global_max - global_min) / dt_kde).astype(int) + 1
-    t_kde = np.linspace(global_min, global_max, Nkde)
-
-    # Parallelized KDE computation
-    n_kde_hf = np.array(Parallel(n_jobs=-1)(
-        delayed(compute_kde)(n_delayed_picks_hf[i, :], t_kde, bin_width) 
-        for i in range(n_shape_x)
-    ))
-
-    s_kde_hf = np.array(Parallel(n_jobs=-1)(
-        delayed(compute_kde)(s_delayed_picks_hf[i, :], t_kde, bin_width)
-        for i in range(s_shape_x)
-    ))
-
-
-    n_up_peaks, n_arr_tg, n_associated_list, n_used_hyperbolas, n_rejected_list, n_rejected_hyperbolas, n_SNR = associate_picks(n_kde_hf, t_kde, n_longi_offset, n_up_peaks, n_arr_tg, dx, c0, w_eval, dt_sel, fs, n_cable_pos, n_associated_list, n_used_hyperbolas, n_rejected_list, n_rejected_hyperbolas, n_SNR)
-    n_shape_x = n_arr_tg.shape[0] 
-    
-    s_up_peaks, s_arr_tg, s_associated_list, s_used_hyperbolas, s_rejected_list, s_rejected_hyperbolas, s_SNR = associate_picks(s_kde_hf, t_kde, s_longi_offset, s_up_peaks, s_arr_tg, dx, c0, w_eval, dt_sel, fs, s_cable_pos, s_associated_list, s_used_hyperbolas, s_rejected_list, s_rejected_hyperbolas, s_SNR)
-    s_shape_x = s_arr_tg.shape[0]
-    
-    pbar.set_description(f"Associated calls: {len(n_associated_list) + len(s_associated_list)}")
-
-
-print(f"Test completed with {iterations} iterations.")
-
-
-# +
-def plot_reject_pick(peaks, longi_offset, dist, dx, associated_list, rejected_list, rejected_hyperbolas):
-    # Plot the selected picks alongside the original picks
-    plt.figure(figsize=(20,8))
-    plt.subplot(2, 2, 1)
-    plt.scatter(peaks[1][:] / fs, (longi_offset + peaks[0][:]) * dx * 1e-3, label='HF', s=0.5)
-    plt.xlabel('Time [s]')
-    plt.ylabel('Distance [km]')
-    plt.subplot(2, 2, 2)
-    for select in associated_list:
-        plt.scatter(select[1][:] / fs, (longi_offset + select[0][:]) * dx * 1e-3, label='LF', s=0.5)
-    plt.xlabel('Time [s]') 
-    # Plot the deleted hyperbolas
-    plt.subplot(2, 2, 3)
-    for hyp in rejected_hyperbolas:
-        plt.plot(hyp, dist/1e3, label='Rejected hyperbola')
-    plt.xlabel('Time [s]')
-    plt.ylabel('Distance [km]')
-    # plot the rejected picks
-    plt.subplot(2, 2, 4)
-    for select in rejected_list:
-        plt.scatter(select[1][:] / fs, (longi_offset + select[0][:]) * dx * 1e-3, label='LF', s=0.5)
-    plt.xlabel('Time [s]')
-    plt.show()
-
-plot_reject_pick(n_peaks, n_longi_offset, n_dist, dx, n_associated_list, n_rejected_list, n_rejected_hyperbolas)
-plot_reject_pick(s_peaks, s_longi_offset, s_dist, dx, s_associated_list, s_rejected_list, s_rejected_hyperbolas)
-
-
-# +
-import numpy as np
-import matplotlib.pyplot as plt
-
-def plot_pick_analysis(associated_list, fs, dx, longi_offset, cable_pos, dist, window_size=5, mu_ref=None, sigma_ref=None):
-    """
-    Create detailed plots of seismic picks with continuity analysis and a normalized curvature score.
-    
-    Parameters:
-    -----------
-    associated_list : list
-        List of tuples containing pick coordinates and times
-    fs : float
-        Sampling frequency
-    dx : float
-        Spatial sampling interval
-    longi_offset : float
-        Longitudinal offset value
-    window_size : float, optional
-        Size of analysis window in seconds (default: 5)
-    mu_ref : float, optional
-        Reference mean curvature for normalization (default: computed from data)
-    sigma_ref : float, optional
-        Reference standard deviation of curvature for normalization (default: computed from data)
-    
-    Returns:
-    --------
-    fig : matplotlib.figure.Figure
-        The created figure object
-    """
-    
-    fig = plt.figure(figsize=(24, 8))
-    
-    curvature_means = []
-    curvature_stds = []
-    
-    for i, select in enumerate(associated_list):
-        times = select[1][:] / fs
-        distances = (longi_offset + select[0][:]) * dx * 1e-3
-        
-        ax = plt.subplot(1, 2*len(associated_list), (i + 1) * 2 - 1)
-        if i == 0:
-            ax.set_ylabel('Distance [km]')
-        ax.scatter(times, distances, label='All Picks', s=0.5, color='gray', alpha=0.5)
-        
-        window_mask = (times > np.min(times)) & (times < np.min(times) + window_size)
-        window_times = times[window_mask]
-        window_distances = distances[window_mask]
-        
-        ax.plot(window_times, window_distances, 
-                label='Windowed Picks', 
-                lw=2, 
-                color='tab:red', 
-                alpha=0.6)
-        # Calulate least squares fit
-        idxmin_t = np.argmin(select[1][:])
-        apex_loc = cable_pos[:, 0][select[0][idxmin_t]]
-        Ti = select[1][:] / fs
-        Nbiter = 20
-
-        # Initial guess (apex_loc, mean_y, -30m, min(Ti))
-        n_init = [apex_loc, np.mean(cable_pos[:,1]), -40, np.min(Ti)]
-
-        # Solve the least squares problem
-        n, residuals = dw.loc.solve_lq(Ti, cable_pos[select[0][:]], c0, Nbiter, fix_z=True, ninit=n_init, residuals=True)
-        loc_hyerbola = dw.loc.calc_arrival_times(n[-1], cable_pos, n[:3], c0)
-        test = np.cumsum(abs(residuals))
-        # rms residual
-        rms = np.sqrt(np.mean(residuals[window_mask]**2))
-        # rms *= 1e4
-
-        left_cs = np.cumsum(abs(residuals[idxmin_t::-1]))
-        right_cs = np.cumsum(abs(residuals[idxmin_t:]))
-        mod_cs = np.concatenate((left_cs[::-1], right_cs[1:]))
-
-        mask_resi = mod_cs < 1500
-        # plot indexes for which only the cumulative sum is less than 1000
-        ax.scatter(select[1][mask_resi] / fs, (longi_offset + select[0][mask_resi]) * dx * 1e-3, label='HF', s=1, color='tab:blue')
-        ax.plot(loc_hyerbola, dist/1e3, label='Hyperbola', color='tab:green', alpha=0.5)
-
-        # Plot residuals
-        # ax.plot(abs(residuals), distances, label='Residuals', color='tab:orange', alpha=0.5)
-        # ax.plot(abs(residuals[window_mask]), window_distances, label='Windowed Residuals', color='tab:blue', alpha=0.5)
-        # ax.plot(np.cumsum(residuals), distances, label='Cumulative Residuals', color='tab:green', alpha=0.5)
-        
-
-        # Calculate curvature
-        ddx = np.diff(window_times)
-        ddy = np.diff(window_distances)
-        ddx2 = np.diff(ddx)
-        ddy2 = np.diff(ddy)
-        curvature = np.abs(ddx2 * ddy[1:] - ddx[1:] * ddy2) / (ddx[1:]**2 + ddy[1:]**2)**(3/2)
-        # curvature = curvature[curvature > 10e-10]
-        curvature_mean = np.mean(curvature)
-
-        ax.set_title(f"Pick Analysis\n"
-                        f"$\\mu_k$ = {compute_curvature(window_times, window_distances):.2f}\n"
-                        f"$\\mu_r$ = {np.mean(abs(residuals[window_mask])):.2f}\n"
-                        f"$RMS$ = {rms:.2f}\n",
-                        fontsize=10)
-        ax.set_xlabel('Time [s]')
-        
-        ax = plt.subplot(1, 2*len(associated_list), (i + 2) * 2 - 2)
-        ax.plot(mod_cs, distances, label='Modified Cumulative Residuals', color='tab:purple', alpha=0.5)
-        ax.set_xlabel('Cumulative Residuals')
-        
-    plt.tight_layout()
-    return fig
-
-# Example usage:
-fig = plot_pick_analysis(n_associated_list[:10], fs, dx, n_longi_offset, n_cable_pos, n_dist)
-fig = plot_pick_analysis(s_associated_list[:10], fs, dx, s_longi_offset, s_cable_pos, s_dist)
-plt.show()
-
-
-# +
-# Localize using the selected picks
-
-
-def loc_from_picks(associated_list, cable_pos, c0, fs):
-    localizations = []
-    alt_localizations = []
-
-    for select in associated_list:
-        idxmin_t = np.argmin(select[1][:])
-        apex_loc = cable_pos[:, 0][select[0][idxmin_t]]
-        Ti = select[1][:] / fs
-        Nbiter = 20
-
-        # Initial guess (apex_loc, mean_y, -30m, min(Ti))
-        n_init = [apex_loc, np.mean(cable_pos[:,1]), -40, np.min(Ti)]
-        print(f'Initial guess: {n_init[0]:.2f} m, {n_init[1]:.2f} m, {n_init[2]:.2f} m, {n_init[3]:.2f} s')
-        # Solve the least squares problem
-        n = dw.loc.solve_lq(Ti, cable_pos[select[0][:]], c0, Nbiter, fix_z=True, ninit=n_init)
-        nalt = dw.loc.solve_lq(Ti, cable_pos[select[0][:]], c0, Nbiter-1, fix_z=True, ninit=n_init)
-
-        localizations.append(n)
-        alt_localizations.append(nalt)
-
-    return localizations, alt_localizations
-
-n_localizations, n_alt_localizations = loc_from_picks(n_associated_list, n_cable_pos, c0, fs)
-s_localizations, s_alt_localizations = loc_from_picks(s_associated_list, s_cable_pos, c0, fs)
-
-
-# +
-def plot_associated(peaks, longi_offset, associated_list, localizations, cable_pos, dist, dx, c0):
-    plt.figure(figsize=(20,8))
-
-    # Plot the time picks with colored associated ones
-    plt.subplot(1, 2, 1)
-    plt.scatter(peaks[1][:] / fs, (longi_offset + peaks[0][:]) * dx * 1e-3, label='LF', s=0.5, alpha=0.2, color='tab:grey')
-    for i, select in enumerate(associated_list):
-        plt.scatter(select[1][:] / fs, (longi_offset + select[0][:]) * dx * 1e-3, label='LF', s=0.5)
-    plt.xlim(0, 60)
-    plt.xlabel('Time [s]')
-    plt.ylabel('Distance [km]')
-
-    # Plot the time picks with the the predicted hyperbola
-    plt.subplot(1, 2, 2)
-    for i, select in enumerate(associated_list):
-        plt.scatter(select[1][:] / fs, (longi_offset + select[0][:]) * dx * 1e-3, label='LF', s=0.5)
-        plt.plot(dw.loc.calc_arrival_times(localizations[i][-1], cable_pos, localizations[i][:3], c0), dist/1e3, color='tab:grey', ls='-', lw=2, alpha=0.7)
-        # plt.plot(select[1][:] / fs, dw.loc.calc_arrival_times(0, cable_pos, alt_localizations[i][:3], c0), color='tab:orange', ls='-', lw=1)
-    plt.grid(linestyle='--', alpha=0.6)
-    plt.xlabel('Time [s]')
-    plt.ylabel('Distance [km]')
-    plt.show()
-
-plot_associated(n_peaks, n_longi_offset, n_associated_list, n_localizations, n_cable_pos, n_dist, dx, c0)
-plot_associated(s_peaks, s_longi_offset, s_associated_list, s_localizations, s_cable_pos, s_dist, dx, c0)
-
-# +
-# Create two list of coordinates, for ponts every 10 km along the cables, the spatial resolution is 2m 
-opticald_n = []
-opticald_s = []
-
-disp_step = 10000 # [m]
-dx_ch = n_ds.attrs['dx'] # [m]
-idx_step = int(disp_step / dx_ch)
-
-for i in range(int(idx_step-df_north["chan_idx"].iloc[0]), len(df_north), int(10000/2)):
-    opticald_n.append((df_north['x'][i], df_north['y'][i]))
-
-for i in range(int(idx_step-df_south["chan_idx"].iloc[0]), len(df_south), int(10000/2)):
-    opticald_s.append((df_south['x'][i], df_south['y'][i]))
-    
-# Plot the grid points on the map
-import cmocean.cm as cmo
-colors_undersea = cmo.deep_r(np.linspace(0, 1, 256)) # blue colors for under the sea
-colors_land = np.array([[0.5, 0.5, 0.5, 1]])  # Solid gray for above sea level
-
-# Combine the color maps
-all_colors = np.vstack((colors_undersea, colors_land))
-custom_cmap = mcolors.LinearSegmentedColormap.from_list('custom_cmap', all_colors)
-
-extent = [x[0], x[-1], y[0], y[-1]]
-
-# Set the light source
-ls = LightSource(azdeg=350, altdeg=45)
-
-# Plot the location of the apex
-plt.figure(figsize=(14, 7))
-ax = plt.gca()
-# Plot the bathymetry relief in background
-rgb = ls.shade(bathy, cmap=custom_cmap, vert_exag=0.1, blend_mode='overlay', vmin=np.min(bathy), vmax=0)
-plot = ax.imshow(rgb, extent=extent, aspect='equal', origin='lower', vmin=np.min(bathy), vmax=0)
-# Plot the cable location in 2D
-ax.plot(df_north['x'], df_north['y'], 'tab:red', label='North cable')
-ax.plot(df_south['x'], df_south['y'], 'tab:orange', label='South cable')
-# ax.plot(cable_pos[j_hf_call[i]][:,0], cable_pos[j_hf_call[i]][:,1], 'tab:green', label='used_cable')
-
-# Add dashed contours at selected depths with annotations
-depth_levels = [-1500, -1000, -600, -250, -80]
-
-contour_dashed = ax.contour(bathy, levels=depth_levels, colors='k', linestyles='--', extent=extent, alpha=0.6)
-ax.clabel(contour_dashed, fmt='%d m', inline=True)
-
-# Plot points along the cable every 10 km in terms of optical distance
-for i, point in enumerate(opticald_n, start=1):
-    ax.plot(point[0], point[1], '.', color='k')
-    ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 8), ha='center', fontsize=12)
-
-for i, point in enumerate(opticald_s, start=1):
-    ax.plot(point[0], point[1], '.', color='k')
-    ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, -15), ha='center', fontsize=12)
-
-
-for i, loc in enumerate(n_localizations):
-    # Put label only for the first point
-    if i == 0:
-        ax.plot(loc[0], loc[1], 'o',  c='tab:purple', lw=4, label='Localized call - north')
-    else:
-        ax.plot(loc[0], loc[1], 'o', c='tab:purple', lw=4)
-for i, loc in enumerate(s_localizations):
-    # Put label only for the first point
-    if i == 0:
-        ax.plot(loc[0], loc[1], 'o', c='tab:green', label='Localized call - south', lw=4)
-    else:
-        ax.plot(loc[0], loc[1], 'o', c='tab:green', lw=4)
-
-# Use a proxy artist for the color bar
-im = ax.imshow(bathy, cmap=custom_cmap, extent=extent, aspect='equal', origin='lower', vmin=np.min(bathy), vmax=0)
-# Calculate width of image over height
-im_ratio = bathy.shape[1] / bathy.shape[0]
-plt.colorbar(im, ax=ax, label='Depth [m]', pad=0.02, orientation='vertical', aspect=25, fraction=0.0195)
-im.remove()
-# Set the labels
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
-# plt.xlim(40000, 34000)
-# plt.ylim(15000, 25000)
-plt.legend(loc='upper left')
-plt.grid(linestyle='--', alpha=0.6, color='k')
-plt.tight_layout()
 plt.show()
