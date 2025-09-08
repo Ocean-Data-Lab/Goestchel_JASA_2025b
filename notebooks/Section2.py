@@ -297,3 +297,40 @@ ax2.set_aspect('equal')
 # plt.tight_layout()
 plt.savefig('../figs/Figure1b.pdf', bbox_inches='tight', transparent=True)
 plt.show()
+# -
+
+# ## Plot the detections  
+
+# +
+# load the peak indexes - North cable
+npeakshf = n_ds["peaks_indexes_tp_HF"].values  # Extract as NumPy array
+npeakslf = n_ds["peaks_indexes_tp_LF"].values
+nSNRhf = n_ds["SNR_hf"].values
+nSNRlf = n_ds["SNR_lf"].values
+
+# load the peak indexes - South cable
+speakshf = s_ds["peaks_indexes_tp_HF"].values
+speakslf = s_ds["peaks_indexes_tp_LF"].values
+sSNRhf = s_ds["SNR_hf"].values
+sSNRlf = s_ds["SNR_lf"].values
+
+# +
+# Sort the peaks based on SNR difference
+npeakshf, nSNRhf, npeakslf, nSNRlf = dw.detect.resolve_hf_lf_crosstalk(
+    npeakshf, npeakslf, nSNRhf, nSNRlf, dt_tol=100, dx_tol=30
+)
+
+speakshf, sSNRhf, speakslf, sSNRlf = dw.detect.resolve_hf_lf_crosstalk(
+    speakshf, speakslf, sSNRhf, sSNRlf, dt_tol=100, dx_tol=30
+)
+# -
+
+plt.rcParams['font.size'] = 24
+# Plot the sorted peaks
+peaks = (npeakshf, npeakslf, speakshf, speakslf)
+SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
+selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
+# dw.assoc.plot_peaks(peaks, SNRs, selected_channels_m, dx, fs)
+fig=dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
+plt.savefig('../figs/Figure2.pdf', bbox_inches='tight', transparent=True)
+plt.show()
