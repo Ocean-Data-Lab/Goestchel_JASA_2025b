@@ -391,46 +391,47 @@ y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
 height_ratio = y_range_south / y_range_north
 print(height_ratio)
 
-fig, axes = plt.subplots(4, 1,figsize=(10,16), constrained_layout=True, sharex=True, sharey=False, gridspec_kw={'height_ratios': [1, 0.22, height_ratio, 0.22]})
+# Calculate the common x-range for all subplots
+x_min = min(min(s_delayed_picks_lf[lf_imax, :]), min(n_delayed_picks_lf[lf_imax, :]))
+x_max = max(max(s_delayed_picks_lf[lf_imax, :]), max(n_delayed_picks_lf[lf_imax, :]))
+
+fig, axes = plt.subplots(4, 1,figsize=(10,16), constrained_layout=True, sharex=True, sharey=False, gridspec_kw={'height_ratios': [1, 0.3, height_ratio, 0.3]})
 axes[0].set_title('North Cable')
 axes[0].scatter(n_delayed_picks_hf[hf_imax, :], (n_longi_offset + npeakshf[0][:]) * dx * 1e-3, label='HF', c=nSNRhf, s=nSNRhf*0.8, cmap='plasma', rasterized=True)
 axes[0].scatter(n_delayed_picks_lf[lf_imax, :], (n_longi_offset + npeakslf[0][:]) * dx * 1e-3, label='LF', c=nSNRlf, s=nSNRlf*0.8, cmap='viridis', rasterized=True)
-axes[0].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
+axes[0].set_xlim(x_min, x_max)
 axes[0].grid(linestyle='--', alpha=0.5)
 axes[0].set_ylabel('Distance [km]')
-axes[0].set_aspect('equal', adjustable='box')
+axes[0].set_aspect('equal', adjustable='datalim')
 
 axes[1].plot(t_kde, n_kde_hf[nlf_imax, :], color='tab:orange', lw=3, label='HF')
 axes[1].plot(t_kde, n_kde_lf[nlf_imax, :], color='tab:green', lw=3, label='LF')
 # plt.bar(lf_bin_edges[:-1], lf_hist, width=bin_width, alpha=0.5, label="Histogram", color='grey', edgecolor='black')
-axes[1].set_xlim(min(s_delayed_picks_lf[nlf_imax, :]), max(s_delayed_picks_lf[nlf_imax, :]))
 # plt.xlim(4, 8)
 axes[1].set_ylim(0, max(np.max(n_kde_hf), np.max(n_kde_lf)) * 1.1)
 axes[1].grid(linestyle='--', alpha=0.5)
 axes[1].legend()
-axes[1].set_ylabel('Weighted\n occurrence [-]')
-axes[1].set_xlabel('Delayed time [s]')
+axes[1].ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+axes[1].set_ylabel('KDE [-]')
+axes[1].legend(loc='lower left')
 
 axes[2].set_title('South Cable')
 axes[2].scatter(s_delayed_picks_hf[hf_imax, :], (s_longi_offset + speakshf[0][:]) * dx * 1e-3, label='HF', c=sSNRhf, s=sSNRhf*0.8, cmap='plasma', rasterized=True)
 axes[2].scatter(s_delayed_picks_lf[lf_imax, :], (s_longi_offset + speakslf[0][:]) * dx * 1e-3, label='LF', c=sSNRlf, s=sSNRlf*0.8, cmap='viridis', rasterized=True)
-axes[2].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
 axes[2].grid(linestyle='--', alpha=0.5)
 axes[2].set_ylabel('Distance [km]')
-axes[2].set_aspect('equal', adjustable='box')
+axes[2].set_aspect('equal', adjustable='datalim')
 
 
 axes[3].plot(t_kde, s_kde_hf[hf_imax, :], color='tab:orange', lw=3, label='HF')
 axes[3].plot(t_kde, s_kde_lf[lf_imax, :], color='tab:green', lw=3, label='LF')
-# plt.bar(s_lf_bin_edges[:-1], s_lf_hist, width=bin_width, alpha=0.5, label="Histogram", color='grey', edgecolor='black')
-axes[3].set_xlim(min(s_delayed_picks_lf[lf_imax, :]), max(s_delayed_picks_lf[lf_imax, :]))
 axes[3].set_ylim(0, max(np.max(s_kde_hf), np.max(s_kde_lf)) * 1.1)
-axes[3].set_ylabel('Weighted\n occurrence [-]')
+axes[3].ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+axes[3].set_ylabel('KDE [-]')
 axes[3].set_xlabel('Delayed time [s]')
-# plt.tight_layout()
+axes[3].legend(loc='lower left')
 
 plt.grid(linestyle='--', alpha=0.5)
-plt.legend()
 fig.savefig('../figs/Figure3.pdf', bbox_inches='tight', transparent=True, format='pdf')
 plt.show()
 
@@ -442,7 +443,7 @@ max_time_lf = t_kde[lf_tmax]
 # +
 # Plot the hyberbola on top of the picks 
 # Create figure
-fig, axes = plt.subplots(2, 1, figsize=(10, 16), sharex=True, sharey=False, constrained_layout=True)
+fig, axes = plt.subplots(2, 1, figsize=(10, 16), sharex=True, sharey=False, constrained_layout=True, gridspec_kw={'height_ratios': [1, height_ratio]})
 
 # First subplot
 sc1 = axes[0].scatter(npeakshf[1][:] / fs, (n_selected_channels_m[0] + npeakshf[0][:] * dx) * 1e-3, 
@@ -468,8 +469,9 @@ axes[0].set_title('North Cable');
 axes[0].set_ylabel('Distance [km]')
 axes[0].grid(linestyle='--', alpha=0.5)
 axes[0].set_ylim(min(n_dist/1e3), max(n_dist/1e3))
+axes[0].set_aspect('equal', adjustable='box')
 
-# Third subplot
+# Second subplot
 sc3 = axes[1].scatter(speakshf[1][:] / fs, (s_selected_channels_m[0] + speakshf[0][:] * dx) * 1e-3, 
                          c='grey',  s=sSNRhf, rasterized=True, alpha=0.7)
 sc3 = axes[1].scatter(speakslf[1][:] / fs, (s_selected_channels_m[0] + speakslf[0][:] * dx) * 1e-3,
@@ -498,6 +500,7 @@ axes[1].grid(linestyle='--', alpha=0.5)
 axes[1].set_xlim(min(npeakshf[1][:] / fs), max(npeakshf[1][:] / fs))
 axes[1].set_ylim(min(s_dist/1e3), max(s_dist/1e3))
 axes[1].set_xticks(np.arange(0, max(speakshf[1][:] / fs)+10, 10))
+axes[1].set_aspect('equal', adjustable='box')
 
 for ax in axes:
     ax.legend(loc='best', frameon=True, fancybox=True, shadow=True)
