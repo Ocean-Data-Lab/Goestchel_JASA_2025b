@@ -954,7 +954,7 @@ associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
 # -
 
-fig = dw.assoc.plot_associated_bicable_paper(npeakshf, speakslf, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs)
+fig = dw.assoc.plot_associated_bicable_paper(npeakshf, speakslf, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6.pdf', bbox_inches=None, transparent=True)
 plt.show()
 
