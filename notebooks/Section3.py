@@ -40,12 +40,18 @@ from scipy.stats import gaussian_kde
 from sklearn.neighbors import KernelDensity
 from scipy.optimize import curve_fit
 import scipy.signal as sp
+import os
 plt.rcParams['font.size'] = 24
 plt.rcParams['lines.linewidth'] = 3
 
+# +
 # Load the peak indexes and the metadata
-n_ds = xr.load_dataset('../data/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
-s_ds = xr.load_dataset('../data/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
+# directory = '../data/detections/'
+# For Gabor filtered detections:
+directory = '../data/detections_Gabor/'
+
+n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
+s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
 
 # +
 # Constants from the metadata
@@ -581,15 +587,15 @@ dw.assoc.clean_singles(slf_assoc_list)
 
 # +
 # Localize using the selected picks
-nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs)
-nlf_pair_loc = dw.loc.loc_from_picks(nlf_assoc_list_pair, n_cable_pos, c0, fs)
-shf_pair_loc = dw.loc.loc_from_picks(shf_assoc_list_pair, s_cable_pos, c0, fs)
-slf_pair_loc = dw.loc.loc_from_picks(slf_assoc_list_pair, s_cable_pos, c0, fs)
+nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
+nlf_pair_loc = dw.loc.loc_from_picks(nlf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
+shf_pair_loc = dw.loc.loc_from_picks(shf_assoc_list_pair, s_cable_pos, c0, fs, return_uncertainty=False)
+slf_pair_loc = dw.loc.loc_from_picks(slf_assoc_list_pair, s_cable_pos, c0, fs, return_uncertainty=False)
 
-nhf_localizations = dw.loc.loc_from_picks(nhf_assoc_list, n_cable_pos, c0, fs)
-nlf_localizations = dw.loc.loc_from_picks(nlf_assoc_list, n_cable_pos, c0, fs)
-shf_localizations = dw.loc.loc_from_picks(shf_assoc_list, s_cable_pos, c0, fs)
-slf_localizations = dw.loc.loc_from_picks(slf_assoc_list, s_cable_pos, c0, fs)
+nhf_localizations = dw.loc.loc_from_picks(nhf_assoc_list, n_cable_pos, c0, fs, return_uncertainty=False)
+nlf_localizations = dw.loc.loc_from_picks(nlf_assoc_list, n_cable_pos, c0, fs, return_uncertainty=False)
+shf_localizations = dw.loc.loc_from_picks(shf_assoc_list, s_cable_pos, c0, fs, return_uncertainty=False)
+slf_localizations = dw.loc.loc_from_picks(slf_assoc_list, s_cable_pos, c0, fs, return_uncertainty=False)
 
 pair_assoc = (nhf_assoc_list_pair, nlf_assoc_list_pair, shf_assoc_list_pair, slf_assoc_list_pair)
 pair_loc = (nhf_pair_loc, nlf_pair_loc, shf_pair_loc, slf_pair_loc)
@@ -597,7 +603,8 @@ associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
 # -
 
-fig = dw.assoc.plot_associated_bicable_paper(npeakshf, speakslf, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
+peaks = (npeakshf, npeakslf, speakshf, speakslf)
+fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 plt.show()
 
@@ -611,7 +618,7 @@ selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
 print(np.min(n_dist), np.max(n_dist))
 win_close = [np.min(n_dist), 56000]
 win_mid = [35000, np.max(n_dist)]
-win_far = [60000, np.max(s_dist)]
+win_far = [56000, np.max(s_dist)]
 
 # Convert windows to indexes
 win_close = [int(win_close[0] / dx)-n_longi_offset, int(win_close[1] / dx)-n_longi_offset]
@@ -628,7 +635,7 @@ peaks_far, snr_far = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_far)
 
 iterations_far = 25
 w_eval_far = 2
-rms_threshold_far = 0.1
+rms_threshold_far = 0.5
 # Reinitialize the delay from the cartesian grid 
 n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
 s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
@@ -692,15 +699,15 @@ dw.assoc.clean_singles(shf_assoc_list)
 dw.assoc.clean_singles(slf_assoc_list)
 
 # +
-nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs)
-nlf_pair_loc = dw.loc.loc_from_picks(nlf_assoc_list_pair, n_cable_pos, c0, fs)
-shf_pair_loc = dw.loc.loc_from_picks(shf_assoc_list_pair, s_cable_pos, c0, fs)
-slf_pair_loc = dw.loc.loc_from_picks(slf_assoc_list_pair, s_cable_pos, c0, fs)
+nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
+nlf_pair_loc = dw.loc.loc_from_picks(nlf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
+shf_pair_loc = dw.loc.loc_from_picks(shf_assoc_list_pair, s_cable_pos, c0, fs, return_uncertainty=False)
+slf_pair_loc = dw.loc.loc_from_picks(slf_assoc_list_pair, s_cable_pos, c0, fs, return_uncertainty=False)
 
-nhf_localizations = dw.loc.loc_from_picks(nhf_assoc_list, n_cable_pos, c0, fs)
-nlf_localizations = dw.loc.loc_from_picks(nlf_assoc_list, n_cable_pos, c0, fs)
-shf_localizations = dw.loc.loc_from_picks(shf_assoc_list, s_cable_pos, c0, fs)
-slf_localizations = dw.loc.loc_from_picks(slf_assoc_list, s_cable_pos, c0, fs)
+nhf_localizations = dw.loc.loc_from_picks(nhf_assoc_list, n_cable_pos, c0, fs, return_uncertainty=False)
+nlf_localizations = dw.loc.loc_from_picks(nlf_assoc_list, n_cable_pos, c0, fs, return_uncertainty=False)
+shf_localizations = dw.loc.loc_from_picks(shf_assoc_list, s_cable_pos, c0, fs, return_uncertainty=False)
+slf_localizations = dw.loc.loc_from_picks(slf_assoc_list, s_cable_pos, c0, fs, return_uncertainty=False)
 
 pair_assoc = (nhf_assoc_list_pair, nlf_assoc_list_pair, shf_assoc_list_pair, slf_assoc_list_pair)
 pair_loc = (nhf_pair_loc, nlf_pair_loc, shf_pair_loc, slf_pair_loc)
@@ -708,8 +715,12 @@ associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
 # -
 
-fig = dw.assoc.plot_associated_bicable_paper(npeakshf, speakslf, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
+fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6b.pdf', bbox_inches=None, transparent=True)
+plt.show()
+
+s_rejected_list = rejected_lists[1]
+dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
 plt.show()
 
 up_peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
