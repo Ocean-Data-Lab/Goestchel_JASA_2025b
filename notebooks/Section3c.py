@@ -46,9 +46,9 @@ plt.rcParams['lines.linewidth'] = 3
 
 # +
 # Load the peak indexes and the metadata
-# directory = '../data/detections/'
+directory = '../data/detections/'
 # For Gabor filtered detections:
-directory = '../data/detections_Gabor/'
+# directory = '../data/detections_Gabor/'
 
 n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
 s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
@@ -336,11 +336,6 @@ height_ratio = y_range_south / y_range_north
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 plt.show()
-# -
-
-up_peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
-SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
-selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
 
 # +
 # apply the spatial windows to the peaks
@@ -355,14 +350,51 @@ win_close = [int(win_close[0] / dx)-n_longi_offset, int(win_close[1] / dx)-n_lon
 win_mid = [int(win_mid[0] / dx)-n_longi_offset, int(win_mid[1] / dx)-n_longi_offset]
 win_far = [int(win_far[0] / dx)-n_longi_offset, int(win_far[1] / dx)-n_longi_offset]
 
+up_peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
+SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
+
 peaks_close, snr_close = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_close)
 peaks_mid, snr_mid = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_mid)
 peaks_far, snr_far = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_far)
-# -
 
+# +
 iterations_far = 25
 w_eval_far = 2
-rms_threshold_far = 0.25
+rms_threshold_far = 0.5
+
+# Refine the cartesian grid and use only the points in the far window
+# Create a grid of coordinates, choosing the spacing of the grid
+dx_fargrid = 500 # [m]
+dy_fargrid = 500 # [m]
+xg_far, yg_far = np.meshgrid(np.arange(xf, x0, dx_fargrid), np.arange(y0, yf, dy_fargrid))
+
+interpolator = RegularGridInterpolator((x, y),  bathy.T)
+bathy_interp = interpolator((xg_far, yg_far))
+
+# Remove points if the ocean depth is too shallow (i.e., less than -25 m)
+mask = bathy_interp < -25
+# Compute arrival times only for valid grid points
+# Flatten the grid points
+xg_far, yg_far = xg_far[mask], yg_far[mask]
+# Filter grid points that are within the far window in terms of x-coordinate
+xg_far_mask = (xg_far >= win_far[0]*dx) 
+yg_far = yg_far[xg_far_mask]
+xg_far = xg_far[xg_far_mask]
+
+#Plot the two grids to check
+
+plt.figure(figsize=(10, 8))
+plt.scatter(xg, yg, c='blue', label='Initial Grid', alpha=0.5)
+plt.scatter(xg_far, yg_far, c='red', label='Refined Grid', alpha=0.5)
+plt.xlabel('X Coordinate (m)')
+plt.ylabel('Y Coordinate (m)')
+plt.title('Comparison of Initial and Refined Grids')
+plt.legend()
+# plt.axis('equal')
+# plt.xlim(56000, 90000)
+plt.grid()
+plt.show()
+
 # Reinitialize the delay from the cartesian grid 
 n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
 s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
@@ -445,13 +477,3 @@ localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_lo
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6b.pdf', bbox_inches=None, transparent=True)
 plt.show()
-
-s_rejected_list = rejected_lists[1]
-dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
-plt.show()
-
-up_peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
-SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
-selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
-fig=dw.assoc.plot_tpicks_resolved(peaks_far, snr_far, selected_channels_m, dx, fs)
-
