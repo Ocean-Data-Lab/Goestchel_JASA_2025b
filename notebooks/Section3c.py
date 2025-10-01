@@ -360,12 +360,12 @@ peaks_far, snr_far = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_far)
 # +
 iterations_far = 25
 w_eval_far = 2
-rms_threshold_far = 0.5
+rms_threshold_far = 0.25
 
 # Refine the cartesian grid and use only the points in the far window
 # Create a grid of coordinates, choosing the spacing of the grid
-dx_fargrid = 500 # [m]
-dy_fargrid = 500 # [m]
+dx_fargrid = 1000 # [m]
+dy_fargrid = 1000 # [m]
 xg_far, yg_far = np.meshgrid(np.arange(xf, x0, dx_fargrid), np.arange(y0, yf, dy_fargrid))
 
 interpolator = RegularGridInterpolator((x, y),  bathy.T)
@@ -396,8 +396,8 @@ plt.grid()
 plt.show()
 
 # Reinitialize the delay from the cartesian grid 
-n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
-s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
+n_arr_tg_far = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg_far, yg_far, zg), c0)
+s_arr_tg_far = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg_far, yg_far, zg), c0)
 
 
 # +
@@ -420,7 +420,7 @@ for iteration in pbar:
     n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf,
     nSNRhf, nSNRlf, sSNRhf, sSNRlf,
     # Grid data
-    n_arr_tg, s_arr_tg, n_shape_x, s_shape_x,
+    n_arr_tg_far, s_arr_tg_far, n_shape_x, s_shape_x,
     # Cable positions
     n_cable_pos, s_cable_pos, n_longi_offset, s_longi_offset,
     # Association lists
