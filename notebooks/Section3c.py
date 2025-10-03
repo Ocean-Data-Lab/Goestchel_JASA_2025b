@@ -46,12 +46,12 @@ plt.rcParams['lines.linewidth'] = 3
 
 # +
 # Load the peak indexes and the metadata
-# directory = '../data/detections/'
+directory = '../data/detections/'
 # For Gabor filtered detections:
-directory = '../data/detections_Gabor/'
+# directory = '../data/detections_Gabor/'
 
-n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
-s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
+n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:52_ipi3_th_4.nc')) 
+s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:52_ipi3_th_5.nc'))
 
 # +
 # Constants from the metadata
@@ -435,6 +435,7 @@ for iteration in pbar:
     pbar.set_description(f"Associated calls, far window: {total_associations}")
 
 # +
+print(f"{sum(len(lst) for lst in association_lists)} total associations after far window refinement.")
 dw.assoc.clean_pairs(nhf_assoc_list_pair, shf_assoc_list_pair, shf_assoc_list)
 dw.assoc.clean_pairs(nlf_assoc_list_pair, slf_assoc_list_pair, slf_assoc_list)
 dw.assoc.clean_pairs(shf_assoc_list_pair, nhf_assoc_list_pair, nhf_assoc_list)
@@ -444,6 +445,8 @@ dw.assoc.clean_singles(nhf_assoc_list)
 dw.assoc.clean_singles(nlf_assoc_list)
 dw.assoc.clean_singles(shf_assoc_list)
 dw.assoc.clean_singles(slf_assoc_list)
+
+print(f"{sum(len(lst) for lst in association_lists)} total associations after cleaning.")
 
 # +
 nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
@@ -465,3 +468,26 @@ localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_lo
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6b.pdf', bbox_inches=None, transparent=True)
 plt.show()
+
+# +
+dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
+dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
+plt.show()
+# dw.assoc.plot_reject_pick(npeakshf, n_longi_offset, n_dist, dx, nhf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
+
+# dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
+# dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
+# dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
+
+# dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
+# dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
+# dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
+
+# +
+peaks = (n_uppeakshf, npeakslf, s_up_peaks_hf, s_up_peaks_lf)
+SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
+selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
+print(sSNRhf.shape, s_up_peaks_hf.shape)
+
+# dw.assoc.plot_peaks(peaks, SNRs, selected_channels_m, dx, fs)
+fig=dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
