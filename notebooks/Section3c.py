@@ -62,7 +62,7 @@ nnx = n_ds.attrs['data_shape'][0]
 snx = s_ds.attrs['data_shape'][0]
 n_selected_channels_m = n_ds.attrs['selected_channels_m']
 s_selected_channels_m = s_ds.attrs['selected_channels_m']
-    
+
 # Constants management
 c0 = 1480
 n_selected_channels = dw.data_handle.get_selected_channels(n_selected_channels_m, dx)
@@ -105,7 +105,6 @@ speakshf, sSNRhf, speakslf, sSNRlf = dw.detect.resolve_hf_lf_crosstalk(
 df_north = pd.read_csv('../data/north_DAS_multicoord.csv')
 df_south = pd.read_csv('../data/south_DAS_multicoord.csv')
 
-
 # Extract the part of the dataframe used for the time picking process
 idx_shift0 = int(n_begin_chan - df_north["chan_idx"].iloc[0]) # Shift between the cable locations (starting at the beach) and the channel locations
 idx_shiftn = int(n_end_chan - df_north["chan_idx"].iloc[-1])
@@ -136,7 +135,6 @@ y = np.linspace(y0, yf, len(ylat))
 
 
 # +
-
 # Cable geometry (make it correspond to x,y,z = cable_pos[:, 0], cable_pos[:, 1], cable_pos[:, 2])
 n_cable_pos = np.zeros((len(df_north_used), 3))
 s_cable_pos = np.zeros((len(df_south_used), 3))
@@ -172,47 +170,20 @@ xg, yg = xg[mask], yg[mask]
 # In case of a meshgrid object (non flattened), use the following code:
 # xg[~mask] = np.nan
 # yg[~mask] = np.nan
-
-# +
-# Initialize the max_kde variable to enter the loop
-n_associated_list = []
-n_used_hyperbolas = []
-n_rejected_list = []
-n_rejected_hyperbolas = []
-
-s_associated_list = []
-s_used_hyperbolas = []
-s_rejected_list = []
-s_rejected_hyperbolas = []
-
-n_up_peaks_hf = np.copy(npeakshf)
-s_up_peaks_hf = np.copy(speakshf)
-n_up_peaks_lf = np.copy(npeakslf)
-s_up_peaks_lf = np.copy(speakslf)
-n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
-s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
-
-# n_arr_tg -= np.min(n_arr_tg, axis=1, keepdims=True)
-# s_arr_tg -= np.min(s_arr_tg, axis=1, keepdims=True)
-
-print(n_arr_tg.shape, nnx, n_cable_pos.shape)
-print(s_arr_tg.shape, snx, s_cable_pos.shape)
-
-# n_arr_tg = n_arr_tg[np.min(n_arr_tg, axis=1) > 20]
 # -
 
 # ## Run the full association process 
 
-dt_kde = 0.5 # [s] Time resolution of the KDE (overlap)
+dt_kde = 0.5 # [s] Time resolution of the KDE (overlap = (bin_width - dt_kde) / bin_width)
 bin_width = 1
 dt_tol = int(0.5 * fs) # [samples] Tolerance for the time index when removing picks
 n_shape_x = xg.shape[0]
 s_shape_x = xg.shape[0]
 dt_sel = 1.4 # [s] Selected time "distance" from the theoretical arrival time
 w_eval = 5 # [s] Width of the evaluation window for curvature estimation
-rms_threshold = 0.3
+rms_threshold = 0.5
 # Set the number of iterations for testing
-iterations = 50
+iterations = 10
 
 # +
 n_up_peaks_hf = np.copy(npeakshf)
@@ -228,17 +199,17 @@ nhf_assoc_list_pair = [] # List to store paired associated picks for the North c
 nlf_assoc_list_pair = [] # List to store paired associated picks for the North cable, LF calls
 nhf_assoc_list = [] # List to store associated picks for the North cable, HF calls
 nlf_assoc_list = [] # List to store associated picks for the North cable, LF calls
-n_used_hyperbolas = []
-n_rejected_list = []
-n_rejected_hyperbolas = []
+n_used_hyperbolas = [] # List to store used hyperbolas, north cable
+n_rejected_list = [] # List to store rejected picks, north cable
+n_rejected_hyperbolas = [] # List to store rejected hyperbolas, north cable
 
 shf_assoc_list_pair = [] # List to store paired associated picks for the South cable, HF calls
 slf_assoc_list_pair = [] # List to store paired associated picks for the South cable, LF calls
 shf_assoc_list = [] # List to store associated picks for the South cable, HF calls
 slf_assoc_list = [] # List to store associated picks for the South cable, LF calls
-s_used_hyperbolas = []
-s_rejected_list = []
-s_rejected_hyperbolas = []
+s_used_hyperbolas = [] # List to store used hyperbolas, south cable
+s_rejected_list = [] # List to store rejected picks, south cable
+s_rejected_hyperbolas = [] # List to store rejected hyperbolas, south cable
 
 association_lists = [
     nhf_assoc_list_pair, nlf_assoc_list_pair, shf_assoc_list_pair, slf_assoc_list_pair,
@@ -288,15 +259,23 @@ for iteration in pbar:
 
 # +
 # Clean the associations
-dw.assoc.clean_pairs(nhf_assoc_list_pair, shf_assoc_list_pair, shf_assoc_list)
-dw.assoc.clean_pairs(nlf_assoc_list_pair, slf_assoc_list_pair, slf_assoc_list)
-dw.assoc.clean_pairs(shf_assoc_list_pair, nhf_assoc_list_pair, nhf_assoc_list)
-dw.assoc.clean_pairs(slf_assoc_list_pair, nlf_assoc_list_pair, nlf_assoc_list)
+print(f"{sum(len(lst) for lst in association_lists)} total associations after first run.")
+# dw.assoc.clean_pairs(nhf_assoc_list_pair, shf_assoc_list_pair, shf_assoc_list)
+# dw.assoc.clean_pairs(nlf_assoc_list_pair, slf_assoc_list_pair, slf_assoc_list)
+# dw.assoc.clean_pairs(shf_assoc_list_pair, nhf_assoc_list_pair, nhf_assoc_list)
+# dw.assoc.clean_pairs(slf_assoc_list_pair, nlf_assoc_list_pair, nlf_assoc_list)
 
-dw.assoc.clean_singles(nhf_assoc_list)
-dw.assoc.clean_singles(nlf_assoc_list)
-dw.assoc.clean_singles(shf_assoc_list)
-dw.assoc.clean_singles(slf_assoc_list)
+# dw.assoc.clean_singles(nhf_assoc_list)
+# dw.assoc.clean_singles(nlf_assoc_list)
+# dw.assoc.clean_singles(shf_assoc_list)
+# dw.assoc.clean_singles(slf_assoc_list)
+print(f"{sum(len(lst) for lst in association_lists)} total associations after cleaning.")
+print(f"Number of HF calls associated on the North cable: {len(nhf_assoc_list)}")
+print(f"Number of LF calls associated on the North cable: {len(nlf_assoc_list)}")
+print(f"Number of HF calls associated on the South cable: {len(shf_assoc_list)}")
+print(f"Number of LF calls associated on the South cable: {len(slf_assoc_list)}")
+print(f"Number of paired HF calls: {len(nhf_assoc_list_pair)}")
+print(f"Number of paired LF calls: {len(nlf_assoc_list_pair)}")
 
 # +
 # Localize using the selected picks
@@ -324,6 +303,12 @@ height_ratio = y_range_south / y_range_north
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 plt.show()
+# -
+
+peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
+SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
+selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
+fig=dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
 
 # +
 # apply the spatial windows to the peaks
@@ -482,12 +467,9 @@ plt.show()
 # dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
 # dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
 # dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
+# -
 
-# +
-peaks = (n_uppeakshf, npeakslf, s_up_peaks_hf, s_up_peaks_lf)
+peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
 SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
 selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
-print(sSNRhf.shape, s_up_peaks_hf.shape)
-
-# dw.assoc.plot_peaks(peaks, SNRs, selected_channels_m, dx, fs)
 fig=dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
