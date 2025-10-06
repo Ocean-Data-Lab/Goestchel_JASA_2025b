@@ -183,7 +183,7 @@ dt_sel = 1.4 # [s] Selected time "distance" from the theoretical arrival time
 w_eval = 5 # [s] Width of the evaluation window for curvature estimation
 rms_threshold = 0.5
 # Set the number of iterations for testing
-iterations = 10
+iterations = 2
 
 # +
 n_up_peaks_hf = np.copy(npeakshf)
@@ -309,6 +309,15 @@ peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
 SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
 selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
 fig=dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
+
+# +
+dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
+dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
+plt.show()
+
+dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
+dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
+plt.show()
 
 # +
 # apply the spatial windows to the peaks

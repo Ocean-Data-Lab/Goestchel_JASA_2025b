@@ -38,8 +38,8 @@ from scipy.optimize import curve_fit
 plt.rcParams['font.size'] = 24
 
 # Load the peak indexes and the metadata
-n_ds = xr.load_dataset('../data/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
-s_ds = xr.load_dataset('../data/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
+n_ds = xr.load_dataset('../data/detections/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc') 
+s_ds = xr.load_dataset('../data/detections/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
 
 # +
 # Constants from the metadata

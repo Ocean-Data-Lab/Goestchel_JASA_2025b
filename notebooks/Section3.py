@@ -22,7 +22,7 @@ ipython.run_line_magic("autoreload", "2")
 
 # %reload_ext autoreload
 # %autoreload 2
-# Imports   
+# Imports
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -46,12 +46,12 @@ plt.rcParams['lines.linewidth'] = 3
 
 # +
 # Load the peak indexes and the metadata
-# directory = '../data/detections/'
+directory = '../data/detections/'
 # For Gabor filtered detections:
-directory = '../data/detections_Gabor/'
+# directory = '../data/detections_Gabor/'
 
-n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
-s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
+n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:52_ipi3_th_4.nc')) 
+s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:52_ipi3_th_5.nc'))
 
 # +
 # Constants from the metadata
@@ -234,11 +234,8 @@ s_delayed_picks_lf = s_idx_times_lf[None, :] - s_arr_tg[:, s_up_peaks_lf[0]]
 
 global_min = min(np.min(n_delayed_picks_hf), np.min(n_delayed_picks_lf), np.min(s_delayed_picks_hf), np.min(s_delayed_picks_lf))
 global_max = max(np.max(n_delayed_picks_hf), np.max(n_delayed_picks_lf), np.max(s_delayed_picks_hf), np.max(s_delayed_picks_lf))
-Nkde=np.ceil((global_max - global_min) / dt_kde).astype(int) + 1
+Nkde = np.ceil((global_max - global_min) / dt_kde).astype(int) + 1
 t_kde = np.linspace(global_min, global_max, Nkde)
-
-print(Nkde)
-
 # -
 
 n_kde_hf = np.array(Parallel(n_jobs=-1)(
@@ -317,10 +314,8 @@ axes[0].grid(linestyle='--', alpha=0.5)
 axes[0].set_ylabel('Distance [km]')
 axes[0].set_aspect('equal', adjustable='datalim')
 
-axes[1].plot(t_kde, n_kde_hf[nlf_imax, :], color='tab:orange', lw=3, label='HF')
+axes[1].plot(t_kde, n_kde_hf[nhf_imax, :], color='tab:orange', lw=3, label='HF')
 axes[1].plot(t_kde, n_kde_lf[nlf_imax, :], color='tab:green', lw=3, label='LF')
-# plt.bar(lf_bin_edges[:-1], lf_hist, width=bin_width, alpha=0.5, label="Histogram", color='grey', edgecolor='black')
-# plt.xlim(4, 8)
 axes[1].set_ylim(0, max(np.max(n_kde_hf), np.max(n_kde_lf)) * 1.1)
 axes[1].grid(linestyle='--', alpha=0.5)
 axes[1].legend()
