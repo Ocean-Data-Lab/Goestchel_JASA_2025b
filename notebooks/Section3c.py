@@ -13,7 +13,7 @@
 #     name: python3
 # ---
 
-# # Attempt at associating the faint calls using line detection
+# # Association section
 
 from IPython import get_ipython
 ipython = get_ipython()
