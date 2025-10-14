@@ -50,8 +50,8 @@ directory = '../data/detections/'
 # For Gabor filtered detections:
 # directory = '../data/detections_Gabor/'
 
-n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:52_ipi3_th_4.nc')) 
-s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:52_ipi3_th_5.nc'))
+n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
+s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
 
 # +
 # Constants from the metadata
@@ -181,9 +181,9 @@ n_shape_x = xg.shape[0]
 s_shape_x = xg.shape[0]
 dt_sel = 1.4 # [s] Selected time "distance" from the theoretical arrival time
 w_eval = 5 # [s] Width of the evaluation window for curvature estimation
-rms_threshold = 0.5
+rms_threshold = 0.3
 # Set the number of iterations for testing
-iterations = 2
+iterations = 20
 
 # +
 n_up_peaks_hf = np.copy(npeakshf)
