@@ -283,10 +283,23 @@ pair_assoc = (nhf_assoc_list_pair, nlf_assoc_list_pair, shf_assoc_list_pair, slf
 pair_loc = (nhf_pair_loc, nlf_pair_loc, shf_pair_loc, slf_pair_loc)
 associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
+# -
 
-# +
 peaks = (npeakshf, npeakslf, speakshf, speakslf)
-
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
 fig.savefig('../figs/Figure6bis_c.pdf', bbox_inches=None, transparent=True)
 plt.show()
+
+# +
+batch = '4'
+timestamp = '2021-11-04_08:06:42'
+annot_root = '../data/annotations/'
+
+
+def get_time_dist(pairs, fs, dx, selected_channels, selected_channel_m):
+    times = pairs[1] / fs
+    dists = selected_channel_m[0] + pairs[0] * dx * selected_channels[2]
+    return np.vstack([times, dists]).T
+
+n_annot = pd.read_csv(f'{annot_root}/Batch{batch}/annotated_calls_north_{timestamp}.csv')
+s_annot = pd.read_csv(f'{annot_root}/Batch{batch}/annotated_calls_south_{timestamp}.csv')
