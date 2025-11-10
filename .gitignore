@@ -169,6 +169,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Pyenv version file
+.python-version
+
 # pytype static type analyzer
 .pytype/
 
