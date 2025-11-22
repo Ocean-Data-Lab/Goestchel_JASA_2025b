@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: venv
 #     language: python
@@ -46,9 +46,9 @@ plt.rcParams['lines.linewidth'] = 3
 
 # +
 # Load the peak indexes and the metadata
-directory = '../data/detections/'
+# directory = '../data/detections/'
 # For Gabor filtered detections:
-# directory = '../data/detections_Gabor/'
+directory = '../data/detections_Gabor/'
 
 n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
 s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
@@ -299,9 +299,10 @@ peaks = (npeakshf, npeakslf, speakshf, speakslf)
 y_range_north = (n_selected_channels_m[1] - n_selected_channels_m[0])  # meters
 y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
 height_ratio = y_range_south / y_range_north
+sel_chan = (n_selected_channels_m, s_selected_channels_m)
 
-fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
-fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
+fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='baseline (60 it.)')
+# fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 plt.show()
 # -
 
@@ -459,7 +460,7 @@ associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
 # -
 
-fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, dx, c0, fs, height_ratio)
+fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='Gabor + FW (60 it.)')
 fig.savefig('../figs/Figure6b.pdf', bbox_inches=None, transparent=True)
 plt.show()
 

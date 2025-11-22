@@ -297,6 +297,41 @@ ax2.set_aspect('equal')
 # plt.tight_layout()
 plt.savefig('../figs/Figure1b.pdf', bbox_inches='tight', transparent=True)
 plt.show()
+
+# +
+plt.rcParams['font.size'] = 12
+y_range_north = (n_selected_channels_m[1] - n_selected_channels_m[0])  # meters
+y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
+height_ratio = y_range_south / y_range_north
+# Plot
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 6*height_ratio), sharex=True, constrained_layout=True)
+
+# North
+ax1.set_title('North Cable')
+for i in range(xg.shape[0]):
+    ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+for j, i in enumerate(examples):
+    ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=2, color=colors[j])
+ax1.set_ylabel('Distance [km]')
+ax1.set_xlabel('Time [s]')
+ax1.spines[['top', 'right']].set_visible(False)
+ax1.grid(ls='--', alpha=0.5)
+ax1.set_aspect('equal')
+
+# South
+ax2.set_title('South Cable')
+for i in range(xg.shape[0]):
+    ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+for j, i in enumerate(examples):
+    ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=2, color=colors[j])
+ax2.set_xlabel('Time [s]')
+ax2.spines[['top', 'right']].set_visible(False)
+ax2.grid(ls='--', alpha=0.5)
+ax2.set_aspect('equal')
+
+# plt.tight_layout()
+plt.savefig('../figs/Figure.pdf', bbox_inches='tight', transparent=True)
+plt.show()
 # -
 
 # ## Plot the detections  
