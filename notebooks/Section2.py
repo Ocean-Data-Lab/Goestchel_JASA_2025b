@@ -6,9 +6,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv
+#     display_name: venv (3.13.5)
 #     language: python
 #     name: python3
 # ---
@@ -265,6 +265,46 @@ plt.ylabel('y [km]')
 plt.legend(loc='upper center', labelspacing=0.2, ncol=2, columnspacing=0.6)
 plt.tight_layout()
 plt.savefig('../figs/Figure1a.pdf', bbox_inches='tight', transparent=True)
+plt.show()
+
+# +
+# Remove the distance offset from the cable depth profiles and plot them
+dist_ref_north = (df_north['chan_m'] - df_north['chan_m'].min())/1e3
+dist_ref_south = (df_south['chan_m'] - df_south['chan_m'].min())/1e3
+fig, ax = plt.subplots(1, 1, figsize=(14, 4), constrained_layout=True)
+
+# --- Depth zone shading ---
+ax.axhspan(-200,    0,     color='#A0C8E0', alpha=0.20, zorder=0)  # Continental shelf
+ax.axhspan(-1500, -200,    color='#1A3E8C', alpha=0.10, zorder=0)  # Continental slope
+
+# --- Zone boundary line at shelf break ---
+ax.axhline(-200, color='steelblue', lw=0.8, ls='--', alpha=0.7, zorder=1)
+
+# --- Zone labels: placed near shore (low x) since axis is no longer inverted ---
+ax.text(75.5, -80,  'Continental shelf (0–200 m)',    fontsize=12, color='#1A4A6A', va='center', ha='left')
+ax.text(75.5, -700, 'Continental slope (200–1500 m)', fontsize=12, color='#0F2050', va='center', ha='left')
+
+# --- Filled cable profiles ---
+ax.fill_between(dist_ref_north, df_north['depth'], -1500,
+                color='tab:red',    alpha=0.08, zorder=2)
+ax.fill_between(dist_ref_south, df_south['depth'], -1500,
+                color='tab:orange', alpha=0.08, zorder=1)
+
+# --- Cable lines ---
+ax.plot(dist_ref_north, df_north['depth'], lw=3, label='North cable', color='tab:red',    zorder=2)
+ax.plot(dist_ref_south, df_south['depth'], lw=3, label='South cable', color='tab:orange', zorder=2, ls='-.')
+
+ax.grid(ls='--', alpha=0.5, which='both')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.xlim(0, 97)
+plt.ylim(-1500, 0)
+ax.set_yticks([-1500, -1000, -500, -350, -200, -50])
+
+plt.xlabel('Distance along the cable [km]')
+plt.ylabel('Depth [m]')
+plt.legend(loc='lower right')
 plt.show()
 
 # +
