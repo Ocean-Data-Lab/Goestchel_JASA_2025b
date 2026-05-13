@@ -281,14 +281,14 @@ ax.axhspan(-1500, -200,    color='#1A3E8C', alpha=0.10, zorder=0)  # Continental
 ax.axhline(-200, color='steelblue', lw=0.8, ls='--', alpha=0.7, zorder=1)
 
 # --- Zone labels: placed near shore (low x) since axis is no longer inverted ---
-ax.text(75.5, -80,  'Continental shelf (0–200 m)',    fontsize=12, color='#1A4A6A', va='center', ha='left')
-ax.text(75.5, -700, 'Continental slope (200–1500 m)', fontsize=12, color='#0F2050', va='center', ha='left')
+ax.text(84.5, -150,  'Continental shelf',    fontsize=12, color='#1A4A6A', va='center', ha='left')
+ax.text(84.5, -450, 'Continental slope', fontsize=12, color='#0F2050', va='center', ha='left')
 
 # --- Filled cable profiles ---
-ax.fill_between(dist_ref_north, df_north['depth'], -1500,
-                color='tab:red',    alpha=0.08, zorder=2)
+# ax.fill_between(dist_ref_north, df_north['depth'], -1500,
+#                 color='tab:red',    alpha=0.3)
 ax.fill_between(dist_ref_south, df_south['depth'], -1500,
-                color='tab:orange', alpha=0.08, zorder=1)
+                color='tab:orange', alpha=0.1)
 
 # --- Cable lines ---
 ax.plot(dist_ref_north, df_north['depth'], lw=3, label='North cable', color='tab:red',    zorder=2)
