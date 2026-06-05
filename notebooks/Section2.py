@@ -305,7 +305,10 @@ ax.set_yticks([-1500, -1000, -500, -350, -200, -50])
 plt.xlabel('Distance along the cable [km]')
 plt.ylabel('Depth [m]')
 plt.legend(loc='lower right')
+plt.savefig('../figs/SuppFigure1a.pdf', bbox_inches='tight', transparent=True)
 plt.show()
+
+
 
 # +
 # Plot
