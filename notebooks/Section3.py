@@ -6,14 +6,14 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv
+#     display_name: venv (3.13.5)
 #     language: python
 #     name: python3
 # ---
 
-# # Attempt at associating the faint calls using line detection
+# # Figures related to section 3 of the paper
 
 from IPython import get_ipython
 ipython = get_ipython()
