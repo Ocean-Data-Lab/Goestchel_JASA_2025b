@@ -8,10 +8,12 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv (3.13.5)
+#     display_name: venv (3.13.5.final.0)
 #     language: python
 #     name: python3
 # ---
+
+# # Section III.D. code
 
 from IPython import get_ipython
 ipython = get_ipython()

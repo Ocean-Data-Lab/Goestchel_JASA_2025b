@@ -13,7 +13,7 @@
 #     name: python3
 # ---
 
-# ## Section V code 
+# # Section V code 
 
 from IPython import get_ipython
 ipython = get_ipython()

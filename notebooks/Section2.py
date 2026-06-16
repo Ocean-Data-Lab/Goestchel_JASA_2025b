@@ -8,10 +8,12 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv (3.13.5)
+#     display_name: venv (3.13.5.final.0)
 #     language: python
 #     name: python3
 # ---
+
+# # Section II code
 
 from IPython import get_ipython
 ipython = get_ipython()
@@ -281,8 +283,8 @@ ax.axhspan(-1500, -200,    color='#1A3E8C', alpha=0.10, zorder=0)  # Continental
 ax.axhline(-200, color='steelblue', lw=0.8, ls='--', alpha=0.7, zorder=1)
 
 # --- Zone labels: placed near shore (low x) since axis is no longer inverted ---
-ax.text(84.5, -150,  'Continental shelf',    fontsize=12, color='#1A4A6A', va='center', ha='left')
-ax.text(84.5, -450, 'Continental slope', fontsize=12, color='#0F2050', va='center', ha='left')
+ax.text(80.5, -150,  'Continental shelf',    fontsize=16, color='#1A4A6A', va='center', ha='left')
+ax.text(80.5, -450, 'Continental slope', fontsize=16, color='#0F2050', va='center', ha='left')
 
 # --- Filled cable profiles ---
 # ax.fill_between(dist_ref_north, df_north['depth'], -1500,
@@ -304,7 +306,7 @@ ax.set_yticks([-1500, -1000, -500, -350, -200, -50])
 
 plt.xlabel('Distance along the cable [km]')
 plt.ylabel('Depth [m]')
-plt.legend(loc='lower right')
+plt.legend(loc='lower left')
 plt.savefig('../figs/SuppFigure1a.pdf', bbox_inches='tight', transparent=True)
 plt.show()
 

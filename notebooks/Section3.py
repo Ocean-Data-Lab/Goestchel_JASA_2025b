@@ -8,12 +8,13 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv (3.13.5)
+#     display_name: venv (3.13.5.final.0)
 #     language: python
 #     name: python3
 # ---
 
-# # Figures related to section 3 of the paper
+# # Section III.A-C code
+# ## This code doesn't plot the last figures of Section III.C for RAM management and computationnal efficiency
 
 from IPython import get_ipython
 ipython = get_ipython()
@@ -50,8 +51,8 @@ directory = '../data/detections/'
 # For Gabor filtered detections:
 # directory = '../data/detections_Gabor/'
 
-n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:52_ipi3_th_4.nc')) 
-s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:52_ipi3_th_5.nc'))
+n_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')) 
+s_ds = xr.load_dataset(os.path.join(directory, 'peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc'))
 
 # +
 # Constants from the metadata
