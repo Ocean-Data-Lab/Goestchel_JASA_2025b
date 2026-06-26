@@ -8,7 +8,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: venv (3.13.5.final.0)
+#     display_name: 'defaultInterpreterPath: 3.13.5.final.0'
 #     language: python
 #     name: python3
 # ---
