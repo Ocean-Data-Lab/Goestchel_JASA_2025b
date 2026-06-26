@@ -32,7 +32,7 @@ from IPython.display import HTML
 from datetime import datetime, timedelta
 
 # +
-with open('../denoised_data/Batch1_Associations/Baseline/association_2021-11-04_02:00:02.pkl', 'rb') as f:
+with open('../data/associations/Batch1/Baseline/association_2021-11-04_02:00:02.pkl', 'rb') as f:
     
     # Load the association object
     association = pickle.load(f)
@@ -63,7 +63,7 @@ utc_str = association['metadata']['south']['fileBeginTimeUTC']
 
 # +
 # Directory containing pickle files
-pkl_dir = '../denoised_data/Batch1_Associations/Baseline'
+pkl_dir = '../data/associations/Batch1/Baseline'
 
 # Initialize list to hold all pick counts
 pick_counts = []
@@ -341,7 +341,7 @@ utm_x0, utm_y0 = dw.map.latlon_to_utm(xlon[0], ylat[0])
 utm_xf, utm_yf = dw.map.latlon_to_utm(xlon[-1], ylat[-1])
 
 df_all = process_all(
-    pkl_dir = '../denoised_data/Batch1_Associations/Baseline',
+    pkl_dir = '../data/associations/Batch1/Baseline',
     north_csv  = '../data/north_DAS_multicoord.csv',
     south_csv  = '../data/south_DAS_multicoord.csv',
     utm_xf     = utm_xf - utm_x0,
