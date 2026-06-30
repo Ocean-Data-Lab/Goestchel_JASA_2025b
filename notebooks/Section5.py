@@ -36,6 +36,7 @@ with open('../data/associations/Batch1/Baseline/association_2021-11-04_02:00:02.
     
     # Load the association object
     association = pickle.load(f)
+#TODO: Convert the .pkl files to HDF5 format and then use the functions form DasOOIDataprocess repo. 
 
 # Explore the keys
 print(association.keys())
