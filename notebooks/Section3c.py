@@ -6,9 +6,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.18.1
+#       jupytext_version: 1.19.4
 #   kernelspec:
-#     display_name: venv (3.13.5.final.0)
+#     display_name: Goestchel_JASA_2025b (3.13.5)
 #     language: python
 #     name: python3
 # ---
@@ -293,18 +293,17 @@ pair_assoc = (nhf_assoc_list_pair, nlf_assoc_list_pair, shf_assoc_list_pair, slf
 pair_loc = (nhf_pair_loc, nlf_pair_loc, shf_pair_loc, slf_pair_loc)
 associations = (nhf_assoc_list, nlf_assoc_list, shf_assoc_list, slf_assoc_list)
 localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
+# -
 
-# +
 peaks = (npeakshf, npeakslf, speakshf, speakslf)
 y_range_north = (n_selected_channels_m[1] - n_selected_channels_m[0])  # meters
 y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
 height_ratio = y_range_south / y_range_north
 sel_chan = (n_selected_channels_m, s_selected_channels_m)
-
+# TODO: fix figure plotting (revert back to before the venv update) (Must be in OOIDataProcess)
 fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='baseline (60 it.)')
 fig.savefig('../figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 plt.show()
-# -
 
 peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
 SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)

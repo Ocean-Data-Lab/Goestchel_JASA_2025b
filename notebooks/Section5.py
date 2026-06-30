@@ -6,9 +6,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.18.1
+#       jupytext_version: 1.19.4
 #   kernelspec:
-#     display_name: 'defaultInterpreterPath: 3.13.5.final.0'
+#     display_name: Goestchel_JASA_2025b (3.13.5)
 #     language: python
 #     name: python3
 # ---
@@ -32,12 +32,7 @@ from IPython.display import HTML
 from datetime import datetime, timedelta
 
 # +
-with open('../data/associations/Batch1/Baseline/association_2021-11-04_02:00:02.pkl', 'rb') as f:
-    
-    # Load the association object
-    association = pickle.load(f)
-#TODO: Convert the .pkl files to HDF5 format and then use the functions form DasOOIDataprocess repo. 
-
+association = dw.assoc.load_assoc('../data/associations/Batch1/Baseline/association_2021-11-04_02:00:02.h5')
 # Explore the keys
 print(association.keys())
 print(association['assoc_pair'].keys())
@@ -70,32 +65,31 @@ pkl_dir = '../data/associations/Batch1/Baseline'
 pick_counts = []
 
 # Iterate through pickle files
-for pkl in sorted(Path(pkl_dir).glob('association_*.pkl')):
-    with open(pkl, 'rb') as f:
-        # Load the association object
-        assoc = pickle.load(f)
-        
-        # Extract all pick counts
-        counts = []
-        
-        # From paired associations
-        for region in ['north', 'south']:
-            for freq in ['hf', 'lf']:
-                data = assoc['assoc_pair'][region][freq]
-                if isinstance(data, list) and len(data) > 0 :
-                    for pair in data:
-                        counts.append(len(pair[0]))
-        
-        # From individual associations
-        for region in ['north', 'south']:
-            for freq in ['hf', 'lf']:
-                data = assoc['assoc'][region][freq]
-                if isinstance(data, list) and len(data) > 0:
-                    for pair in data:
-                        counts.append(len(pair[0]))
-        
-        # Add all counts from this file to our collection
-        pick_counts.extend(counts)
+for h5 in sorted(Path(pkl_dir).glob('association_*.h5')):
+    # Load the association object
+    assoc = dw.assoc.load_assoc(h5)
+    
+    # Extract all pick counts
+    counts = []
+    
+    # From paired associations
+    for region in ['north', 'south']:
+        for freq in ['hf', 'lf']:
+            data = assoc['assoc_pair'][region][freq]
+            if isinstance(data, list) and len(data) > 0 :
+                for pair in data:
+                    counts.append(len(pair[0]))
+    
+    # From individual associations
+    for region in ['north', 'south']:
+        for freq in ['hf', 'lf']:
+            data = assoc['assoc'][region][freq]
+            if isinstance(data, list) and len(data) > 0:
+                for pair in data:
+                    counts.append(len(pair[0]))
+    
+    # Add all counts from this file to our collection
+    pick_counts.extend(counts)
 
 # Create histogram visualization
 plt.figure(figsize=(12, 7))
@@ -113,7 +107,7 @@ n, bins, patches = plt.hist(pick_counts, bins=100, alpha=0.7, color='steelblue',
 
 # Add labels and title
 plt.xlabel('Number of Channels (picks)', fontsize=14)
-plt.ylabel('Occurence', fontsize=14)
+plt.ylabel('Occurrence', fontsize=14)
 plt.title('Distribution of Time Picks Count', fontsize=16)
 
 # Add grid for better readability
@@ -216,9 +210,8 @@ C0 = 1480  # sound speed (m/s)
 
 
 # Helper functions with metadata
-def load_association(pkl_path: Path) -> dict:
-    with open(pkl_path, 'rb') as f:
-        return pickle.load(f)
+def load_association(h5_path: Path) -> dict:
+    return dw.assoc.load_assoc(h5_path)
 
 
 def get_cable_pos(df_path: str, side_meta: dict) -> np.ndarray:
@@ -322,11 +315,11 @@ def process_one_file(pkl_path: Path, north_csv: str, south_csv: str, utm_xf: flo
     return rows
 
 
-def process_all(pkl_dir: str, north_csv: str, south_csv: str, utm_xf: float, utm_y0: float) -> pd.DataFrame:
+def process_all(h5_dir: str, north_csv: str, south_csv: str, utm_xf: float, utm_y0: float) -> pd.DataFrame:
     all_rows = []
-    for pkl in sorted(Path(pkl_dir).glob('association_*.pkl')):
-        print(f"Processing {pkl.name}...")
-        all_rows.extend(process_one_file(pkl, north_csv, south_csv, utm_xf, utm_y0))
+    for h5 in sorted(Path(h5_dir).glob('association_*.h5')):
+        print(f"Processing {h5.name}...")
+        all_rows.extend(process_one_file(h5, north_csv, south_csv, utm_xf, utm_y0))
     return pd.DataFrame(all_rows, columns=[
         'utc','sensor','call_type',
         'x_local','y_local','z_local',
@@ -342,7 +335,7 @@ utm_x0, utm_y0 = dw.map.latlon_to_utm(xlon[0], ylat[0])
 utm_xf, utm_yf = dw.map.latlon_to_utm(xlon[-1], ylat[-1])
 
 df_all = process_all(
-    pkl_dir = '../data/associations/Batch1/Baseline',
+    h5_dir = '../data/associations/Batch1/Baseline',
     north_csv  = '../data/north_DAS_multicoord.csv',
     south_csv  = '../data/south_DAS_multicoord.csv',
     utm_xf     = utm_xf - utm_x0,

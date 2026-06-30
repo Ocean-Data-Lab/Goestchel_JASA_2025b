@@ -6,9 +6,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.18.1
+#       jupytext_version: 1.19.4
 #   kernelspec:
-#     display_name: venv (3.13.5.final.0)
+#     display_name: Goestchel_JASA_2025b (3.13.5)
 #     language: python
 #     name: python3
 # ---
