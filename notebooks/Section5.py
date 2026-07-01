@@ -8,7 +8,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.19.4
 #   kernelspec:
-#     display_name: Goestchel_JASA_2025b (3.13.5)
+#     display_name: Goestchel_JASA_2025b (3.13.5.final.0)
 #     language: python
 #     name: python3
 # ---
