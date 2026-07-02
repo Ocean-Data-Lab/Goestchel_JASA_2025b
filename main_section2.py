@@ -1,19 +1,4 @@
-# ---
-# jupyter:
-#   jupytext:
-#     formats: ipynb,py:light
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.19.4
-#   kernelspec:
-#     display_name: Goestchel_JASA_2025b (3.13.5)
-#     language: python
-#     name: python3
-# ---
-
-# # Section II code
+## Section II code
 
 # Imports
 import os
