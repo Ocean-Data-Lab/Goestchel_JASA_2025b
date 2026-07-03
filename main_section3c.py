@@ -1,19 +1,4 @@
-# ---
-# jupyter:
-#   jupytext:
-#     formats: ipynb,py:light
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.19.4
-#   kernelspec:
-#     display_name: 'defaultInterpreterPath: 3.13.5.final.0'
-#     language: python
-#     name: python3
-# ---
-
-# # Section III.C code
+## Section III.C code
 
 import numpy as np
 import xarray as xr
@@ -249,8 +234,8 @@ def main(directory:str = 'data/detections/'):
     height_ratio = y_range_south / y_range_north
     sel_chan = (n_selected_channels_m, s_selected_channels_m)
 
-    fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='Gabor + FW (60 it.)')
-    fig.savefig('figs/Figure6b.pdf', bbox_inches=None, transparent=True)
+    fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='Gabor + FW (20 it.)')
+    fig.savefig('figs/Figure6a.pdf', bbox_inches=None, transparent=True)
 
     dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
     dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
@@ -278,7 +263,6 @@ def main(directory:str = 'data/detections/'):
     peaks_mid, snr_mid = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_mid)
     peaks_far, snr_far = dw.assoc.apply_spatial_windows(up_peaks, SNRs, win_far)
 
-    # +
     iterations_far = 25
     w_eval_far = 2
     rms_threshold_far = 0.25
@@ -320,8 +304,6 @@ def main(directory:str = 'data/detections/'):
     n_arr_tg_far = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg_far, yg_far, zg), c0)
     s_arr_tg_far = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg_far, yg_far, zg), c0)
 
-
-    # +
     n_up_peaks_hf = np.copy(peaks_far[0])
     s_up_peaks_hf = np.copy(peaks_far[2])
     n_up_peaks_lf = np.copy(peaks_far[1])
@@ -332,7 +314,6 @@ def main(directory:str = 'data/detections/'):
     sSNRhf = np.copy(snr_far[2])
     sSNRlf = np.copy(snr_far[3])
 
-    # +
     pbar = tqdm(range(iterations_far), desc="Associated calls, far window: 0")
 
     for iteration in pbar:
@@ -367,7 +348,6 @@ def main(directory:str = 'data/detections/'):
         total_associations = sum(len(lst) for lst in association_lists)
         pbar.set_description(f"Associated calls, far window: {total_associations}")
 
-    # +
     print(f"{sum(len(lst) for lst in association_lists)} total associations after far window refinement.")
     dw.assoc.clean_pairs(nhf_assoc_list_pair, shf_assoc_list_pair, shf_assoc_list)
     dw.assoc.clean_pairs(nlf_assoc_list_pair, slf_assoc_list_pair, slf_assoc_list)
@@ -381,7 +361,6 @@ def main(directory:str = 'data/detections/'):
 
     print(f"{sum(len(lst) for lst in association_lists)} total associations after cleaning.")
 
-    # +
     nhf_pair_loc = dw.loc.loc_from_picks(nhf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
     nlf_pair_loc = dw.loc.loc_from_picks(nlf_assoc_list_pair, n_cable_pos, c0, fs, return_uncertainty=False)
     shf_pair_loc = dw.loc.loc_from_picks(shf_assoc_list_pair, s_cable_pos, c0, fs, return_uncertainty=False)
@@ -398,10 +377,9 @@ def main(directory:str = 'data/detections/'):
     localizations = (nhf_localizations, nlf_localizations, shf_localizations, slf_localizations)
 
     fig = dw.assoc.plot_associated_bicable_paper(peaks, n_longi_offset, pair_assoc, pair_loc, associations, localizations, n_cable_pos, s_cable_pos, n_dist, s_dist, sel_chan, dx, c0, fs, height_ratio, title='Gabor + FW (60 it.)')
-    fig.savefig('../figs/Figure6b.pdf', bbox_inches=None, transparent=True)
+    fig.savefig('figs/Figure6b.pdf', bbox_inches=None, transparent=True)
     # plt.show()
 
-    # +
     dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
     dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
     # plt.show()
@@ -424,6 +402,6 @@ def main(directory:str = 'data/detections/'):
 if __name__ == '__main__':
     # For Gabor filtered detections use: directory = 'data/detections_Gabor/'
     # For Baseline detections use:
-    directory = 'data/detections_Gabor/'
+    directory = 'data/detections/'
 
     main(directory)
