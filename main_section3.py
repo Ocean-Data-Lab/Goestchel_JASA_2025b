@@ -1,19 +1,4 @@
-# ---
-# jupyter:
-#   jupytext:
-#     formats: ipynb,py:light
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.19.4
-#   kernelspec:
-#     display_name: Goestchel_JASA_2025b (3.13.5)
-#     language: python
-#     name: python3
-# ---
-
-# # Section III.A-C code
+## Section III.A-C code
 # ## This code doesn't plot the last figures of Section III.C for RAM management and computationnal efficiency
 
 # Imports
