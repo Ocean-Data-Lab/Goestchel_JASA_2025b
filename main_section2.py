@@ -6,40 +6,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 import das4whales as dw
 import pandas as pd
-import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from matplotlib.colors import LightSource
-from tqdm import tqdm
-import dask.array as da
 import xarray as xr
-from joblib import Parallel, delayed
-from scipy.stats import gaussian_kde
 from scipy.interpolate import RegularGridInterpolator
 import cmocean.cm as cmo
 from matplotlib.ticker import FuncFormatter
-plt.rcParams['font.size'] = 24
+
+plt.rcParams["font.size"] = 24
 
 
 def main():
 
-    os.makedirs('figs', exist_ok=True)
+    os.makedirs("figs", exist_ok=True)
     # Load the peak indexes and the metadata
-    n_ds = xr.load_dataset('data/detections/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc')
-    s_ds = xr.load_dataset('data/detections/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc')
+    n_ds = xr.load_dataset(
+        "data/detections/peaks_indexes_tp_North_2021-11-04_02:00:02_ipi3_th_4.nc"
+    )
+    s_ds = xr.load_dataset(
+        "data/detections/peaks_indexes_tp_South_2021-11-04_02:00:02_ipi3_th_5.nc"
+    )
 
     # Constants from the metadata
 
-    fs = n_ds.attrs['fs']
-    dx = n_ds.attrs['dx']
-    nnx = n_ds.attrs['data_shape'][0]
-    snx = s_ds.attrs['data_shape'][0]
-    n_selected_channels_m = n_ds.attrs['selected_channels_m']
-    s_selected_channels_m = s_ds.attrs['selected_channels_m']
-        
+    fs = n_ds.attrs["fs"]
+    dx = n_ds.attrs["dx"]
+    nnx = n_ds.attrs["data_shape"][0]
+    snx = s_ds.attrs["data_shape"][0]
+    n_selected_channels_m = n_ds.attrs["selected_channels_m"]
+    s_selected_channels_m = s_ds.attrs["selected_channels_m"]
+
     # Constants management
     c0 = 1480
-    n_selected_channels = dw.data_handle.get_selected_channels(n_selected_channels_m, dx)
-    s_selected_channels = dw.data_handle.get_selected_channels(s_selected_channels_m, dx)
+    n_selected_channels = dw.data_handle.get_selected_channels(
+        n_selected_channels_m, dx
+    )
+    s_selected_channels = dw.data_handle.get_selected_channels(
+        s_selected_channels_m, dx
+    )
     n_begin_chan = n_selected_channels[0]
     n_end_chan = n_selected_channels[1]
     n_longi_offset = n_selected_channels[0] // n_selected_channels[2]
@@ -51,24 +55,31 @@ def main():
     dx = dx * n_selected_channels[2]
 
     # Import the cable location
-    df_north = pd.read_csv('data/north_DAS_multicoord.csv')
-    df_south = pd.read_csv('data/south_DAS_multicoord.csv')
-
+    df_north = pd.read_csv("data/north_DAS_multicoord.csv")
+    df_south = pd.read_csv("data/south_DAS_multicoord.csv")
 
     # Extract the part of the dataframe used for the time picking process
-    idx_shift0 = int(n_begin_chan - df_north["chan_idx"].iloc[0]) # Shift between the cable locations (starting at the beach) and the channel locations
+    idx_shift0 = int(
+        n_begin_chan - df_north["chan_idx"].iloc[0]
+    )  # Shift between the cable locations (starting at the beach) and the channel locations
     idx_shiftn = int(n_end_chan - df_north["chan_idx"].iloc[-1])
 
-    df_north_used = df_north.iloc[idx_shift0:idx_shiftn:n_selected_channels[2]][:nnx]
+    df_north_used = df_north.iloc[idx_shift0 : idx_shiftn : n_selected_channels[2]][
+        :nnx
+    ]
 
-    idx_shift0 = int(s_begin_chan - df_south["chan_idx"].iloc[0]) # Shift between the cable locations (starting at the beach) and the channel locations
+    idx_shift0 = int(
+        s_begin_chan - df_south["chan_idx"].iloc[0]
+    )  # Shift between the cable locations (starting at the beach) and the channel locations
     idx_shiftn = int(s_end_chan - df_south["chan_idx"].iloc[-1])
 
-    df_south_used = df_south.iloc[idx_shift0:idx_shiftn:s_selected_channels[2]][:snx]
+    df_south_used = df_south.iloc[idx_shift0 : idx_shiftn : s_selected_channels[2]][
+        :snx
+    ]
 
     # Import the bathymetry data
-    bathy, xlon, ylat = dw.map.load_bathymetry('data/GMRT_OOI_RCA_Cables.grd')
-    print(f'Origin of the corrdinates. Latitude = {ylat[0]}, Longitude = {xlon[-1]}')
+    bathy, xlon, ylat = dw.map.load_bathymetry("data/GMRT_OOI_RCA_Cables.grd")
+    print(f"Origin of the corrdinates. Latitude = {ylat[0]}, Longitude = {xlon[-1]}")
 
     utm_x0, utm_y0 = dw.map.latlon_to_utm(xlon[0], ylat[0])
     utm_xf, utm_yf = dw.map.latlon_to_utm(xlon[-1], ylat[-1])
@@ -83,39 +94,43 @@ def main():
     x = np.linspace(x0, xf, len(xlon))
     y = np.linspace(y0, yf, len(ylat))
 
-    # Create two list of coordinates, for ponts every 10 km along the cables, the spatial resolution is 2m 
+    # Create two list of coordinates, for ponts every 10 km along the cables, the spatial resolution is 2m
     opticald_n = []
     opticald_s = []
-    disp_step = 10000 # [m]
-    dx_ch = 2.0419 # [m]
+    disp_step = 10000  # [m]
+    dx_ch = 2.0419  # [m]
     idx_step = int(disp_step / dx_ch)
 
-    for i in range(int(idx_step-df_north["chan_idx"].iloc[0]), len(df_north), int(10000/2)):
-        opticald_n.append((df_north['x'][i], df_north['y'][i]))
+    for i in range(
+        int(idx_step - df_north["chan_idx"].iloc[0]), len(df_north), int(10000 / 2)
+    ):
+        opticald_n.append((df_north["x"][i], df_north["y"][i]))
 
-    for i in range(int(idx_step-df_north["chan_idx"].iloc[0]), len(df_south), int(10000/2)):
-        opticald_s.append((df_south['x'][i], df_south['y'][i]))
+    for i in range(
+        int(idx_step - df_north["chan_idx"].iloc[0]), len(df_south), int(10000 / 2)
+    ):
+        opticald_s.append((df_south["x"][i], df_south["y"][i]))
 
     n_cable_pos = np.zeros((len(df_north_used), 3))
     s_cable_pos = np.zeros((len(df_south_used), 3))
 
-    n_cable_pos[:, 0] = df_north_used['x']
-    n_cable_pos[:, 1] = df_north_used['y']
-    n_cable_pos[:, 2] = df_north_used['depth']
+    n_cable_pos[:, 0] = df_north_used["x"]
+    n_cable_pos[:, 1] = df_north_used["y"]
+    n_cable_pos[:, 2] = df_north_used["depth"]
 
-    s_cable_pos[:, 0] = df_south_used['x']
-    s_cable_pos[:, 1] = df_south_used['y']
-    s_cable_pos[:, 2] = df_south_used['depth']
+    s_cable_pos[:, 0] = df_south_used["x"]
+    s_cable_pos[:, 1] = df_south_used["y"]
+    s_cable_pos[:, 2] = df_south_used["depth"]
 
     # Create a grid of coordinates, choosing the spacing of the grid
-    dx_grid = 2000 # [m]
-    dy_grid = 2000 # [m]
+    dx_grid = 2000  # [m]
+    dy_grid = 2000  # [m]
     xg, yg = np.meshgrid(np.arange(xf, x0, dx_grid), np.arange(y0, yf, dy_grid))
 
     ti = 0
     zg = -30
 
-    interpolator = RegularGridInterpolator((x, y),  bathy.T)
+    interpolator = RegularGridInterpolator((x, y), bathy.T)
     bathy_interp = interpolator((xg, yg))
 
     # Remove points if the ocean depth is too shallow (i.e., less than -25 m)
@@ -132,8 +147,8 @@ def main():
     n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
     s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
 
-    # Convert Pacific City latitude and longitude to UTM coordinates 
-    lat_pc, lon_pc = 45.201801, -123.960861 # Pacific City lat/lon
+    # Convert Pacific City latitude and longitude to UTM coordinates
+    lat_pc, lon_pc = 45.201801, -123.960861  # Pacific City lat/lon
     utm_x_pc, utm_y_pc = dw.map.latlon_to_utm(lon_pc, lat_pc)
 
     # Adjust Pacific City's UTM coordinates to the shifted coordinate system (relative to utm_xf, utm_yf)
@@ -142,21 +157,28 @@ def main():
     # Pick grid location to plot as examples
     examples = [421, 555, 800, 347]  # Example indices to plot
     max_delay = 555
-    colors = ['tab:pink', 'tab:purple', 'tab:green', 'gold'] # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
+    colors = [
+        "tab:pink",
+        "tab:purple",
+        "tab:green",
+        "gold",
+    ]  # cm.plasma(np.linspace(0, 0.75, len(examples))) # Color map for examples
 
     print(f"Selected examples to plot on grid and delays: {examples}")
 
     # Plot the grid points on the map
-    colors_undersea = cmo.deep_r(np.linspace(0, 1, 256)) # blue colors for under the sea
+    colors_undersea = cmo.deep_r(
+        np.linspace(0, 1, 256)
+    )  # blue colors for under the sea
     colors_land = np.array([[0.5, 0.5, 0.5, 1]])  # Solid gray for above sea level
 
     # Combine the color maps
     all_colors = np.vstack((colors_undersea, colors_land))
-    custom_cmap = mcolors.LinearSegmentedColormap.from_list('custom_cmap', all_colors)
+    custom_cmap = mcolors.LinearSegmentedColormap.from_list("custom_cmap", all_colors)
 
     extent = [x[0], x[-1], y[0], y[-1]]
 
-    print(f'Extent of the map: {extent} km')    
+    print(f"Extent of the map: {extent} km")
 
     # Set the light source
     ls = LightSource(azdeg=350, altdeg=45)
@@ -165,52 +187,142 @@ def main():
     ax = plt.gca()
 
     # Plot the bathymetry relief in background
-    rgb = ls.shade(bathy, cmap=custom_cmap, vert_exag=0.1, blend_mode='overlay', vmin=np.min(bathy), vmax=0)
-    plot = ax.imshow(rgb, extent=extent, aspect='equal', origin='lower' , vmin=np.min(bathy), vmax=0)
+    rgb = ls.shade(
+        bathy,
+        cmap=custom_cmap,
+        vert_exag=0.1,
+        blend_mode="overlay",
+        vmin=np.min(bathy),
+        vmax=0,
+    )
+    plot = ax.imshow(
+        rgb, extent=extent, aspect="equal", origin="lower", vmin=np.min(bathy), vmax=0
+    )
 
     # Plot the cable location in 2D
-    ax.plot(df_north['x'], df_north['y'], 'tab:red', label='North cable', lw=2.5)
-    ax.plot(df_south['x'], df_south['y'], 'tab:orange', label='South cable', lw=2.5)
+    ax.plot(df_north["x"], df_north["y"], "tab:red", label="North cable", lw=2.5)
+    ax.plot(df_south["x"], df_south["y"], "tab:orange", label="South cable", lw=2.5)
 
     # Plot the used cable locations
     # ax.plot(df_north_used['x'], df_north_used['y'], 'tab:green', label='Used cable locations')
 
     # Plot the grid points
-    ax.scatter(xg, yg, c='grey', s=10, label='Grid points')
+    ax.scatter(xg, yg, c="grey", s=10, label="Grid points")
     # Plot the examples grid points
     for i, example in enumerate(examples):
         if i == 0:
-            ax.scatter(xg[example], yg[example], color='white', edgecolors='k', s=200, label=f'Example sources', marker='*')
-            ax.scatter(xg[example], yg[example], color=colors[i], s=300, marker='*', edgecolors='k', zorder=5)
+            ax.scatter(
+                xg[example],
+                yg[example],
+                color="white",
+                edgecolors="k",
+                s=200,
+                label="Example sources",
+                marker="*",
+            )
+            ax.scatter(
+                xg[example],
+                yg[example],
+                color=colors[i],
+                s=300,
+                marker="*",
+                edgecolors="k",
+                zorder=5,
+            )
         else:
-            ax.scatter(xg[example], yg[example], color=colors[i], s=300, marker='*', edgecolors='k', zorder=5)
+            ax.scatter(
+                xg[example],
+                yg[example],
+                color=colors[i],
+                s=300,
+                marker="*",
+                edgecolors="k",
+                zorder=5,
+            )
 
     # Plot points along the cable every 10 km in terms of optical distance
     for i, point in enumerate(opticald_n, start=1):
         if i == 1:
-            ax.plot(point[0], point[1], '.', color='k', markersize=10, label='Cable Length [km]')
+            ax.plot(
+                point[0],
+                point[1],
+                ".",
+                color="k",
+                markersize=10,
+                label="Cable Length [km]",
+            )
             # Annotate the points with the distance
-            ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 10), ha='center')
+            ax.annotate(
+                f"{i * 10}",
+                (point[0], point[1]),
+                textcoords="offset points",
+                xytext=(5, 10),
+                ha="center",
+            )
         else:
-            ax.plot(point[0], point[1], '.', color='k', markersize=10)
+            ax.plot(point[0], point[1], ".", color="k", markersize=10)
             # Annotate the points with the distance
-            ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, 10), ha='center')
+            ax.annotate(
+                f"{i * 10}",
+                (point[0], point[1]),
+                textcoords="offset points",
+                xytext=(5, 10),
+                ha="center",
+            )
 
     for i, point in enumerate(opticald_s, start=1):
-        ax.plot(point[0], point[1], '.', color='k', markersize=10)
-        ax.annotate(f'{i*10}', (point[0], point[1]), textcoords='offset points', xytext=(5, -30), ha='center')
+        ax.plot(point[0], point[1], ".", color="k", markersize=10)
+        ax.annotate(
+            f"{i * 10}",
+            (point[0], point[1]),
+            textcoords="offset points",
+            xytext=(5, -30),
+            ha="center",
+        )
 
     # Plot the Pacific City location
-    ax.scatter(utm_x_pc, utm_y_pc, marker='s', color='tab:red', s=100, zorder=5, edgecolor='k')
-    ax.annotate('Pacific City', (utm_x_pc, utm_y_pc), 
-                textcoords='offset points', xytext=(15, 20), 
-                ha='center', color='k',
-                bbox=dict(boxstyle='round,pad=0.1', facecolor='white', alpha=0.8))
+    ax.scatter(
+        utm_x_pc, utm_y_pc, marker="s", color="tab:red", s=100, zorder=5, edgecolor="k"
+    )
+    ax.annotate(
+        "Pacific City",
+        (utm_x_pc, utm_y_pc),
+        textcoords="offset points",
+        xytext=(15, 20),
+        ha="center",
+        color="k",
+        bbox=dict(boxstyle="round,pad=0.1", facecolor="white", alpha=0.8),
+    )
 
     # Plot the repeater locations
-    ax.scatter(df_north['x'].iloc[-1], df_north['y'].iloc[-1], marker='o', color='white', s=100, zorder=5, edgecolor='k', label='Repeaters')
-    ax.scatter(df_north['x'].iloc[-1], df_north['y'].iloc[-1], marker='o', color='tab:red', s=100, zorder=5, edgecolor='k')
-    ax.scatter(df_south['x'].iloc[-1], df_south['y'].iloc[-1], marker='o', color='tab:orange', s=100, zorder=5, edgecolor='k')
+    ax.scatter(
+        df_north["x"].iloc[-1],
+        df_north["y"].iloc[-1],
+        marker="o",
+        color="white",
+        s=100,
+        zorder=5,
+        edgecolor="k",
+        label="Repeaters",
+    )
+    ax.scatter(
+        df_north["x"].iloc[-1],
+        df_north["y"].iloc[-1],
+        marker="o",
+        color="tab:red",
+        s=100,
+        zorder=5,
+        edgecolor="k",
+    )
+    ax.scatter(
+        df_south["x"].iloc[-1],
+        df_south["y"].iloc[-1],
+        marker="o",
+        color="tab:orange",
+        s=100,
+        zorder=5,
+        edgecolor="k",
+    )
 
     # Add dashed contours at selected depths with annotations
     # depth_levels = [-20]
@@ -219,134 +331,183 @@ def main():
     # ax.clabel(contour_dashed, fmt='%d m', inline=True, fontsize=9)
 
     # Use a proxy artist for the color bar
-    im = ax.imshow(bathy, cmap=custom_cmap, extent=extent, aspect='equal', origin='lower', vmin=np.min(bathy), vmax=0)
+    im = ax.imshow(
+        bathy,
+        cmap=custom_cmap,
+        extent=extent,
+        aspect="equal",
+        origin="lower",
+        vmin=np.min(bathy),
+        vmax=0,
+    )
     im_ratio = bathy.shape[1] / bathy.shape[0]
-    plt.colorbar(im, ax=ax, label='Depth [m]', pad=0.02, orientation='vertical', aspect=25, fraction=0.0195)
+    plt.colorbar(
+        im,
+        ax=ax,
+        label="Depth [m]",
+        pad=0.02,
+        orientation="vertical",
+        aspect=25,
+        fraction=0.0195,
+    )
     im.remove()
     # Set the labels
 
     # Convert axis labels to kilometers using custom formatter
     def m_to_km_formatter(x, pos):
         """Convert meters to kilometers for axis labels"""
-        return f'{x/1000:.0f}'
+        return f"{x / 1000:.0f}"
 
     # Apply the formatter to both axes
     ax.xaxis.set_major_formatter(FuncFormatter(m_to_km_formatter))
     ax.yaxis.set_major_formatter(FuncFormatter(m_to_km_formatter))
 
-    plt.xlabel('x [km]')
-    plt.ylabel('y [km]')
-    plt.legend(loc='upper center', labelspacing=0.2, ncol=2, columnspacing=0.6)
+    plt.xlabel("x [km]")
+    plt.ylabel("y [km]")
+    plt.legend(loc="upper center", labelspacing=0.2, ncol=2, columnspacing=0.6)
     plt.tight_layout()
-    plt.savefig('figs/Figure1a.pdf', bbox_inches='tight', transparent=True)
+    plt.savefig("figs/Figure1a.pdf", bbox_inches="tight", transparent=True)
     # plt.show()
 
     # Remove the distance offset from the cable depth profiles and plot them
-    dist_ref_north = (df_north['chan_m'] - df_north['chan_m'].min())/1e3
-    dist_ref_south = (df_south['chan_m'] - df_south['chan_m'].min())/1e3
+    dist_ref_north = (df_north["chan_m"] - df_north["chan_m"].min()) / 1e3
+    dist_ref_south = (df_south["chan_m"] - df_south["chan_m"].min()) / 1e3
     fig, ax = plt.subplots(1, 1, figsize=(14, 4), constrained_layout=True)
 
     # --- Depth zone shading ---
-    ax.axhspan(-200,    0,     color='#A0C8E0', alpha=0.20, zorder=0)  # Continental shelf
-    ax.axhspan(-1500, -200,    color='#1A3E8C', alpha=0.10, zorder=0)  # Continental slope
+    ax.axhspan(-200, 0, color="#A0C8E0", alpha=0.20, zorder=0)  # Continental shelf
+    ax.axhspan(-1500, -200, color="#1A3E8C", alpha=0.10, zorder=0)  # Continental slope
 
     # --- Zone boundary line at shelf break ---
-    ax.axhline(-200, color='steelblue', lw=0.8, ls='--', alpha=0.7, zorder=1)
+    ax.axhline(-200, color="steelblue", lw=0.8, ls="--", alpha=0.7, zorder=1)
 
     # --- Zone labels: placed near shore (low x) since axis is no longer inverted ---
-    ax.text(80.5, -150,  'Continental shelf',    fontsize=16, color='#1A4A6A', va='center', ha='left')
-    ax.text(80.5, -450, 'Continental slope', fontsize=16, color='#0F2050', va='center', ha='left')
+    ax.text(
+        80.5,
+        -150,
+        "Continental shelf",
+        fontsize=16,
+        color="#1A4A6A",
+        va="center",
+        ha="left",
+    )
+    ax.text(
+        80.5,
+        -450,
+        "Continental slope",
+        fontsize=16,
+        color="#0F2050",
+        va="center",
+        ha="left",
+    )
 
     # --- Filled cable profiles ---
     # ax.fill_between(dist_ref_north, df_north['depth'], -1500,
     #                 color='tab:red',    alpha=0.3)
-    ax.fill_between(dist_ref_south, df_south['depth'], -1500,
-                    color='tab:orange', alpha=0.1)
+    ax.fill_between(
+        dist_ref_south, df_south["depth"], -1500, color="tab:orange", alpha=0.1
+    )
 
     # --- Cable lines ---
-    ax.plot(dist_ref_north, df_north['depth'], lw=3, label='North cable', color='tab:red',    zorder=2)
-    ax.plot(dist_ref_south, df_south['depth'], lw=3, label='South cable', color='tab:orange', zorder=2, ls='-.')
+    ax.plot(
+        dist_ref_north,
+        df_north["depth"],
+        lw=3,
+        label="North cable",
+        color="tab:red",
+        zorder=2,
+    )
+    ax.plot(
+        dist_ref_south,
+        df_south["depth"],
+        lw=3,
+        label="South cable",
+        color="tab:orange",
+        zorder=2,
+        ls="-.",
+    )
 
-    ax.grid(ls='--', alpha=0.5, which='both')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    ax.grid(ls="--", alpha=0.5, which="both")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     plt.xlim(0, 97)
     plt.ylim(-1500, 0)
     ax.set_yticks([-1500, -1000, -500, -350, -200, -50])
 
-    plt.xlabel('Distance along the cable [km]')
-    plt.ylabel('Depth [m]')
-    plt.legend(loc='lower left')
-    plt.savefig('figs/SuppFigure1a.pdf', bbox_inches='tight', transparent=True)
-    #plt.show()()
-
-
+    plt.xlabel("Distance along the cable [km]")
+    plt.ylabel("Depth [m]")
+    plt.legend(loc="lower left")
+    plt.savefig("figs/SuppFigure1a.pdf", bbox_inches="tight", transparent=True)
+    # plt.show()()
 
     # Plot
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3, 7), sharex=True, constrained_layout=True)
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1, figsize=(3, 7), sharex=True, constrained_layout=True
+    )
 
     # North
-    ax1.set_title('North Cable')
+    ax1.set_title("North Cable")
     for i in range(xg.shape[0]):
-        ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+        ax1.plot(n_arr_tg[i, :], n_dist / 1e3, lw=0.5, color="tab:blue", alpha=0.1)
     for j, i in enumerate(examples):
-        ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=2, color=colors[j])
-    ax1.set_ylabel('Distance [km]')
-    ax1.spines[['top', 'right']].set_visible(False)
-    ax1.grid(ls='--', alpha=0.5)
-    ax1.set_aspect('equal')
+        ax1.plot(n_arr_tg[i, :], n_dist / 1e3, lw=2, color=colors[j])
+    ax1.set_ylabel("Distance [km]")
+    ax1.spines[["top", "right"]].set_visible(False)
+    ax1.grid(ls="--", alpha=0.5)
+    ax1.set_aspect("equal")
 
     # South
-    ax2.set_title('South Cable')
+    ax2.set_title("South Cable")
     for i in range(xg.shape[0]):
-        ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+        ax2.plot(s_arr_tg[i, :], s_dist / 1e3, lw=0.5, color="tab:blue", alpha=0.1)
     for j, i in enumerate(examples):
-        ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=2, color=colors[j])
-    ax2.set_ylabel('Distance [km]')
-    ax2.set_xlabel('Time [s]')
-    ax2.spines[['top', 'right']].set_visible(False)
-    ax2.grid(ls='--', alpha=0.5)
-    ax2.set_aspect('equal')
+        ax2.plot(s_arr_tg[i, :], s_dist / 1e3, lw=2, color=colors[j])
+    ax2.set_ylabel("Distance [km]")
+    ax2.set_xlabel("Time [s]")
+    ax2.spines[["top", "right"]].set_visible(False)
+    ax2.grid(ls="--", alpha=0.5)
+    ax2.set_aspect("equal")
 
     # plt.tight_layout()
-    plt.savefig('figs/Figure1b.pdf', bbox_inches='tight', transparent=True)
-    #plt.show()()
+    plt.savefig("figs/Figure1b.pdf", bbox_inches="tight", transparent=True)
+    # plt.show()()
 
-    plt.rcParams['font.size'] = 12
-    y_range_north = (n_selected_channels_m[1] - n_selected_channels_m[0])  # meters
-    y_range_south = (s_selected_channels_m[1] - s_selected_channels_m[0])  # meters
+    plt.rcParams["font.size"] = 12
+    y_range_north = n_selected_channels_m[1] - n_selected_channels_m[0]  # meters
+    y_range_south = s_selected_channels_m[1] - s_selected_channels_m[0]  # meters
     height_ratio = y_range_south / y_range_north
     # Plot
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 6*height_ratio), sharex=True, constrained_layout=True)
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(6, 6 * height_ratio), sharex=True, constrained_layout=True
+    )
 
     # North
-    ax1.set_title('North Cable')
+    ax1.set_title("North Cable")
     for i in range(xg.shape[0]):
-        ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+        ax1.plot(n_arr_tg[i, :], n_dist / 1e3, lw=0.5, color="tab:blue", alpha=0.1)
     for j, i in enumerate(examples):
-        ax1.plot(n_arr_tg[i, :], n_dist/1e3, lw=2, color=colors[j])
-    ax1.set_ylabel('Distance [km]')
-    ax1.set_xlabel('Time [s]')
-    ax1.spines[['top', 'right']].set_visible(False)
-    ax1.grid(ls='--', alpha=0.5)
-    ax1.set_aspect('equal')
+        ax1.plot(n_arr_tg[i, :], n_dist / 1e3, lw=2, color=colors[j])
+    ax1.set_ylabel("Distance [km]")
+    ax1.set_xlabel("Time [s]")
+    ax1.spines[["top", "right"]].set_visible(False)
+    ax1.grid(ls="--", alpha=0.5)
+    ax1.set_aspect("equal")
 
     # South
-    ax2.set_title('South Cable')
+    ax2.set_title("South Cable")
     for i in range(xg.shape[0]):
-        ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=0.5, color='tab:blue', alpha=0.1)
+        ax2.plot(s_arr_tg[i, :], s_dist / 1e3, lw=0.5, color="tab:blue", alpha=0.1)
     for j, i in enumerate(examples):
-        ax2.plot(s_arr_tg[i, :], s_dist/1e3, lw=2, color=colors[j])
-    ax2.set_xlabel('Time [s]')
-    ax2.spines[['top', 'right']].set_visible(False)
-    ax2.grid(ls='--', alpha=0.5)
-    ax2.set_aspect('equal')
+        ax2.plot(s_arr_tg[i, :], s_dist / 1e3, lw=2, color=colors[j])
+    ax2.set_xlabel("Time [s]")
+    ax2.spines[["top", "right"]].set_visible(False)
+    ax2.grid(ls="--", alpha=0.5)
+    ax2.set_aspect("equal")
 
     # plt.tight_layout()
-    plt.savefig('figs/Figure.pdf', bbox_inches='tight', transparent=True)
-    #plt.show()()
-
+    plt.savefig("figs/Figure.pdf", bbox_inches="tight", transparent=True)
+    # plt.show()()
 
     # ## Plot the detections
 
@@ -371,17 +532,16 @@ def main():
         speakshf, speakslf, sSNRhf, sSNRlf, dt_tol=100, dx_tol=30
     )
 
-    plt.rcParams['font.size'] = 24
+    plt.rcParams["font.size"] = 24
     # Plot the sorted peaks
     peaks = (npeakshf, npeakslf, speakshf, speakslf)
     SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
     selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
     # dw.assoc.plot_peaks(peaks, SNRs, selected_channels_m, dx, fs)
     fig = dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
-    plt.savefig('figs/Figure2.pdf', bbox_inches='tight', transparent=True)
-    #plt.show()()
+    plt.savefig("figs/Figure2.pdf", bbox_inches="tight", transparent=True)
+    # plt.show()()
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
