@@ -46,10 +46,8 @@ def main():
     )
     n_begin_chan = n_selected_channels[0]
     n_end_chan = n_selected_channels[1]
-    n_longi_offset = n_selected_channels[0] // n_selected_channels[2]
     s_begin_chan = s_selected_channels[0]
     s_end_chan = s_selected_channels[1]
-    s_longi_offset = s_selected_channels[0] // s_selected_channels[2]
     n_dist = (np.arange(nnx) * n_selected_channels[2] + n_selected_channels[0]) * dx
     s_dist = (np.arange(snx) * s_selected_channels[2] + s_selected_channels[0]) * dx
     dx = dx * n_selected_channels[2]
@@ -89,8 +87,7 @@ def main():
     xf, yf = utm_xf - utm_xf, utm_yf - utm_y0
     print(xf, yf)
     # # Create vectors of coordinates
-    utm_x = np.linspace(utm_x0, utm_xf, len(xlon))
-    utm_y = np.linspace(utm_y0, utm_yf, len(ylat))
+
     x = np.linspace(x0, xf, len(xlon))
     y = np.linspace(y0, yf, len(ylat))
 
@@ -156,7 +153,6 @@ def main():
 
     # Pick grid location to plot as examples
     examples = [421, 555, 800, 347]  # Example indices to plot
-    max_delay = 555
     colors = [
         "tab:pink",
         "tab:purple",
