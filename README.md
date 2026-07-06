@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/829659096.svg)]()
+[![DOI](https://zenodo.org/badge/829659096.svg)](https://doi.org/10.5281/zenodo.21222284)
 
 # [Automated association of fin whale calls for localization using distributed acoustic sensing](https://doi.org/10.1121/10.0044257)
 
