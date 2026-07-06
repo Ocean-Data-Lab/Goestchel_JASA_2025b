@@ -1,3 +1,6 @@
+## Section V code
+
+# Imports
 import numpy as np
 import matplotlib.pyplot as plt
 import das4whales as dw
@@ -5,10 +8,10 @@ import pandas as pd
 import matplotlib.colors as mcolors
 from matplotlib.colors import LightSource
 from pathlib import Path
-
-plt.rcParams["font.size"] = 20
 import scipy.spatial as spa
 import datetime
+
+plt.rcParams["font.size"] = 20
 
 
 def main():

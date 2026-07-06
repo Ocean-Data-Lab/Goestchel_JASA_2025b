@@ -108,19 +108,6 @@ def main():
     bathy, xlon, ylat = dw.map.load_bathymetry("data/GMRT_OOI_RCA_Cables.grd")
     print(f"Origin of the corrdinates. Latitude = {ylat[0]}, Longitude = {xlon[-1]}")
 
-    utm_x0, utm_y0 = dw.map.latlon_to_utm(xlon[0], ylat[0])
-    utm_xf, utm_yf = dw.map.latlon_to_utm(xlon[-1], ylat[-1])
-
-    # Change the reference point to the last point
-    x0, y0 = utm_xf - utm_x0, utm_y0 - utm_y0
-    xf, yf = utm_xf - utm_xf, utm_yf - utm_y0
-    print(xf, yf)
-    # # Create vectors of coordinates
-    utm_x = np.linspace(utm_x0, utm_xf, len(xlon))
-    utm_y = np.linspace(utm_y0, utm_yf, len(ylat))
-    x = np.linspace(x0, xf, len(xlon))
-    y = np.linspace(y0, yf, len(ylat))
-
     # Sort the peaks based on SNR difference
     npeakshf, nSNRhf, npeakslf, nSNRlf = dw.detect.resolve_hf_lf_crosstalk(
         npeakshf, npeakslf, nSNRhf, nSNRlf, dt_tol=100, dx_tol=30

@@ -191,7 +191,7 @@ def main():
         vmin=np.min(bathy),
         vmax=0,
     )
-    plot = ax.imshow(
+    ax.imshow(
         rgb, extent=extent, aspect="equal", origin="lower", vmin=np.min(bathy), vmax=0
     )
 
@@ -336,7 +336,6 @@ def main():
         vmin=np.min(bathy),
         vmax=0,
     )
-    im_ratio = bathy.shape[1] / bathy.shape[0]
     plt.colorbar(
         im,
         ax=ax,
@@ -535,7 +534,7 @@ def main():
     selected_channels_m = (n_selected_channels_m, s_selected_channels_m)
     # dw.assoc.plot_peaks(peaks, SNRs, selected_channels_m, dx, fs)
     fig = dw.assoc.plot_tpicks_resolved(peaks, SNRs, selected_channels_m, dx, fs)
-    plt.savefig("figs/Figure2.pdf", bbox_inches="tight", transparent=True)
+    fig.savefig("figs/Figure2.pdf", bbox_inches="tight", transparent=True)
     # plt.show()()
 
 

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import das4whales as dw
 import pandas as pd
 from joblib import Parallel, delayed
+from scipy.interpolate import RegularGridInterpolator
 
 plt.rcParams["font.size"] = 24
 plt.rcParams["lines.linewidth"] = 3
@@ -116,13 +117,10 @@ def main():
     x0, y0 = utm_xf - utm_x0, utm_y0 - utm_y0
     xf, yf = utm_xf - utm_xf, utm_yf - utm_y0
     print(xf, yf)
+
     # # Create vectors of coordinates
-    utm_x = np.linspace(utm_x0, utm_xf, len(xlon))
-    utm_y = np.linspace(utm_y0, utm_yf, len(ylat))
     x = np.linspace(x0, xf, len(xlon))
     y = np.linspace(y0, yf, len(ylat))
-
-    # dw.map.plot_cables2D(df_north, df_south, bathy, xlon, ylat)
 
     # Cable geometry (make it correspond to x,y,z = cable_pos[:, 0], cable_pos[:, 1], cable_pos[:, 2])
     n_cable_pos = np.zeros((len(df_north_used), 3))
@@ -135,8 +133,6 @@ def main():
     s_cable_pos[:, 0] = df_south_used["x"]
     s_cable_pos[:, 1] = df_south_used["y"]
     s_cable_pos[:, 2] = df_south_used["depth"]
-
-    from scipy.interpolate import RegularGridInterpolator
 
     # Create a grid of coordinates, choosing the spacing of the grid
     dx_grid = 2000  # [m]
@@ -166,20 +162,6 @@ def main():
     n_shape_x = xg.shape[0]
     s_shape_x = xg.shape[0]
     dt_sel = 1.4  # [s] Selected time "distance" from the theoretical arrival time
-    w_eval = 5  # [s] Width of the evaluation window for curvature estimation
-    # Set the number of iterations for testing
-    iterations = 40
-
-    # Initialize the max_kde variable to enter the loop
-    n_associated_list = []
-    n_used_hyperbolas = []
-    n_rejected_list = []
-    n_rejected_hyperbolas = []
-
-    s_associated_list = []
-    s_used_hyperbolas = []
-    s_rejected_list = []
-    s_rejected_hyperbolas = []
 
     n_up_peaks_hf = np.copy(npeakshf)
     s_up_peaks_hf = np.copy(speakshf)
@@ -188,13 +170,8 @@ def main():
     n_arr_tg = dw.loc.calc_arrival_times(ti, n_cable_pos, (xg, yg, zg), c0)
     s_arr_tg = dw.loc.calc_arrival_times(ti, s_cable_pos, (xg, yg, zg), c0)
 
-    # n_arr_tg -= np.min(n_arr_tg, axis=1, keepdims=True)
-    # s_arr_tg -= np.min(s_arr_tg, axis=1, keepdims=True)
-
     print(n_arr_tg.shape, nnx, n_cable_pos.shape)
     print(s_arr_tg.shape, snx, s_cable_pos.shape)
-
-    # n_arr_tg = n_arr_tg[np.min(n_arr_tg, axis=1) > 20]
 
     n_idx_times_hf = np.array(n_up_peaks_hf[1]) / fs  # Update with the remaining peaks
     n_idx_times_lf = np.array(n_up_peaks_lf[1]) / fs  # Update with the remaining peaks
@@ -430,7 +407,7 @@ def main():
     )
 
     # First subplot
-    sc1 = axes[0].scatter(
+    axes[0].scatter(
         npeakshf[1][:] / fs,
         (n_selected_channels_m[0] + npeakshf[0][:] * dx) * 1e-3,
         c="grey",
@@ -438,7 +415,7 @@ def main():
         rasterized=True,
         alpha=0.7,
     )
-    sc1 = axes[0].scatter(
+    axes[0].scatter(
         npeakslf[1][:] / fs,
         (n_selected_channels_m[0] + npeakslf[0][:] * dx) * 1e-3,
         c="grey",
@@ -490,7 +467,7 @@ def main():
     axes[0].set_aspect("equal", adjustable="box")
 
     # Second subplot
-    sc3 = axes[1].scatter(
+    axes[1].scatter(
         speakshf[1][:] / fs,
         (s_selected_channels_m[0] + speakshf[0][:] * dx) * 1e-3,
         c="grey",
@@ -498,7 +475,7 @@ def main():
         rasterized=True,
         alpha=0.7,
     )
-    sc3 = axes[1].scatter(
+    axes[1].scatter(
         speakslf[1][:] / fs,
         (s_selected_channels_m[0] + speakslf[0][:] * dx) * 1e-3,
         c="grey",

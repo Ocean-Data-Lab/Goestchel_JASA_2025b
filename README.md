@@ -1,7 +1,7 @@
+[![DOI](https://zenodo.org/badge/829659096.svg)]()
 
 # [Automated association of fin whale calls for localization using distributed acoustic sensing](https://doi.org/10.1121/10.0044257)
 
-## Note: This repository is still a work in process, feel free to submit an [Issue](https://github.com/Ocean-Data-Lab/Goestchel_JASA_2025b/issues)
 
 This code generates the figures related to the published paper [Automated association of fin whale calls for localization using distributed acoustic sensing]((https://doi.org/10.1121/10.0044257)). It serves as a tutorial for the fin whale calls automated association pipeline described in the paper. 
 
@@ -35,6 +35,13 @@ Install [`das4whales`](https://github.com/DAS4Whales/DAS4Whales) and its depende
 uv pip install das4whales
 ```
 
+## Data 
+Most of the data neede to run the script are available in the github repository directly. However, to run `main_section5.py`, the results of the association process for the five batches of the study are needed. To download them :
+```shell
+wget "https://zenodo.org/records/21220346/files/associations.zip?download=1" -O data/associations.zip
+unzip -d data/ data/associations.zip && rm data/associations.zip
+```
+
 ## Makefile 
 All the scripts can be run using the `makefile`. Example for the section 3:
 
@@ -44,11 +51,11 @@ make section3
 
 ## Scripts description 
 The scripts in this repository are related to the sections of the paper [Automated association of fin whale calls for localization using distributed acoustic sensing]() and follow its organization. They depend on functions developed in [DAS4whales](https://github.com/DAS4Whales/DAS4Whales) and show how the automated association can be run on subsets of the data. Namely:
-- `main_section2.py` .
-- `main_section3.py` .
-- `main_section3c.py` .
-- `main_section3d.py` .
-- `main_section5.py`.
+- `main_section2.py` Plot the map and the detections of the fin whale calls
+- `main_section3.py` Gives an example of the SNR-weighted KDE and the first step of the association
+- `main_section3c.py` Associate calls on 60s of data and plot the result
+- `main_section3d.py` Associate calls on 60s of data with different result and plot the corresponding annotations.
+- `main_section5.py`. Localize calls from associations. Data from [10.5281/zenodo.21220345](https://doi.org/10.5281/zenodo.21220345) are needed.    
 
 ## DATA 
 

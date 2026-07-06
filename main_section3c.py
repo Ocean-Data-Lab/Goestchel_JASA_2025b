@@ -1,5 +1,6 @@
 ## Section III.C code
 
+# Imports
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -105,9 +106,8 @@ def main(directory: str = "data/detections/"):
     x0, y0 = utm_xf - utm_x0, utm_y0 - utm_y0
     xf, yf = utm_xf - utm_xf, utm_yf - utm_y0
     print(xf, yf)
+
     # Create vectors of coordinates
-    utm_x = np.linspace(utm_x0, utm_xf, len(xlon))
-    utm_y = np.linspace(utm_y0, utm_yf, len(ylat))
     x = np.linspace(x0, xf, len(xlon))
     y = np.linspace(y0, yf, len(ylat))
 
@@ -606,15 +606,6 @@ def main(directory: str = "data/detections/"):
         fs,
     )
     # plt.show()
-    # dw.assoc.plot_reject_pick(npeakshf, n_longi_offset, n_dist, dx, nhf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
-
-    # dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list_pair, n_rejected_list, n_rejected_hyperbolas, fs)
-    # dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
-    # dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list_pair, s_rejected_list, s_rejected_hyperbolas, fs)
-
-    # dw.assoc.plot_reject_pick(npeakslf, n_longi_offset, n_dist, dx, nlf_assoc_list, n_rejected_list, n_rejected_hyperbolas, fs)
-    # dw.assoc.plot_reject_pick(speakshf, s_longi_offset, s_dist, dx, shf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
-    # dw.assoc.plot_reject_pick(speakslf, s_longi_offset, s_dist, dx, slf_assoc_list, s_rejected_list, s_rejected_hyperbolas, fs)
 
     peaks = (n_up_peaks_hf, n_up_peaks_lf, s_up_peaks_hf, s_up_peaks_lf)
     SNRs = (nSNRhf, nSNRlf, sSNRhf, sSNRlf)
