@@ -14,6 +14,12 @@ Please cite this code and its associated paper as:
 - Quentin Goestchel & Léa Bouffaut (2025). DAS4Whales: A Python package to analyze Distributed Acoustic Sensing (DAS) data for marine bioacoustics (v0.1.0). Zenodo. https://doi.org/10.5281/zenodo.15278387
 ```
 
+## Part of the datasets for the [DCLDE 2027 conference](https://www.dclde.org/)
+
+The annotations and detections used in this paper are part of the [localization dataset](https://www.dclde.org/) of the 2027 DCLDE conference. If you want a challenge and benchmark association and localization methods, go check it out ! 
+
+[**10.25921/v2vh-8w16**](https://data.noaa.gov/metaview/page?xml=NOAA/NESDIS/NGDC/MGG/passive_acoustic//iso/xml/DCLDE_2027_DAS-finwhale-localization.xml&view=getDataView)
+
 ## Python environment and [das4whales](https://das4whales.readthedocs.io/en/latest/src/install.html) installation
 The association code relies on functions that were contributed to the [`das4whales`](https://github.com/DAS4Whales/DAS4Whales) package. The dependencies of [`das4whales`](https://github.com/DAS4Whales/DAS4Whales) should be sufficient to run the scripts related to the sections of the article. 
 
